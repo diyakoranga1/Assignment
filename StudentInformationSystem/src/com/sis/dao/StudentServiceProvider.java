@@ -9,6 +9,7 @@ import java.util.List;
 import com.sis.entity.Course;
 import com.sis.entity.Payment;
 import com.sis.entity.Student;
+import com.sis.entity.Teacher;
 import com.sis.exception.*;
 
 public interface StudentServiceProvider {
@@ -33,10 +34,23 @@ public interface StudentServiceProvider {
     void enrollStudentInCourse(Student student, Course course);
     
     Course getCourseById(int courseId) throws CourseNotFoundException;
+    
     void addStudentToDatabase(Student student);
     
     List<Student> getAllStudentsFromDatabase() throws SQLException;
     
     Student getStudentById(int studentId) throws SQLException, StudentNotFoundException;
     
+
+    void updateStudentInDatabase(Student student);
+
+    List<Course> getAllCoursesFromDatabase() throws SQLException;
+
+    List<Teacher> getAllTeachersFromDatabase() throws SQLException;
+
+    void displayCourseInfo(List<Course> courses);
+
+    void displayTeacherInfo(List<Teacher> teachers);
+
+
 }

@@ -10,6 +10,7 @@ import com.sis.dao.StudentServiceProvider;
 import com.sis.entity.Course;
 import com.sis.entity.Payment;
 import com.sis.entity.Student;
+import com.sis.entity.Teacher;
 
 public class SISController {
 
@@ -22,11 +23,6 @@ public class SISController {
     public Student getStudentInformation() {
         @SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
-
-        System.out.print("Enter Student ID: ");
-        int studentId = scanner.nextInt();
-        scanner.nextLine(); 
-
         System.out.print("Enter First Name: ");
         String firstName = scanner.nextLine();
         System.out.print("Enter Last Name: ");
@@ -39,12 +35,14 @@ public class SISController {
         System.out.print("Enter Phone Number: ");
         String phoneNumber = scanner.nextLine();
 
-        return new Student(studentId, firstName, lastName, dateOfBirth, email, phoneNumber);
+        return new Student(0, firstName, lastName, dateOfBirth, email, phoneNumber);
     }
 
     public void addStudentToDatabase(Student student) {
         try {
             studentServiceProvider.addStudentToDatabase(student);
+            System.out.println("Student added successfully.");
+
         } catch (Exception e) {
             handleException(e);
         }
@@ -110,6 +108,8 @@ public class SISController {
         try {
             Student student = studentServiceProvider.getStudentById(studentId);
             studentServiceProvider.makePayment(student, amount, paymentDate);
+            System.out.println("payment added successfully.");
+
         } catch (Exception e) {
             handleException(e);
         }
@@ -184,6 +184,130 @@ public class SISController {
         }
     }
 
+
+    public void updateStudentInformation(int studentId) {
+        try {
+            Student existingStudent = studentServiceProvider.getStudentById(studentId);
+
+            if (existingStudent != null) {
+                Student updatedStudent = getUpdatedStudentInformation(existingStudent);
+                studentServiceProvider.updateStudentInDatabase(updatedStudent);
+            } else {
+                System.out.println("Student not found.");
+            }
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    public void displayAllCourses() {
+        try {
+            List<Course> allCourses = studentServiceProvider.getAllCoursesFromDatabase();
+            System.out.println("All Courses:");
+            studentServiceProvider.displayCourseInfo(allCourses);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    public void displayAllTeachers() {
+        try {
+            List<Teacher> allTeachers = studentServiceProvider.getAllTeachersFromDatabase();
+            System.out.println("All Teachers:");
+            studentServiceProvider.displayTeacherInfo(allTeachers);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    public void displayPaymentsForStudent(Student studentId) {
+        try {
+            List<Payment> payments = studentServiceProvider.getPayments(studentId);
+            displayPayments(payments);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+    public Course getCourseById(int courseId) {
+        try {
+            return studentServiceProvider.getCourseById(courseId);
+        } catch (Exception e) {
+            handleException(e);
+            return null;
+        }
+    }
+    public Teacher getTeacherInformation() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter First Name: ");
+        String firstName = scanner.nextLine();
+        System.out.print("Enter Last Name: ");
+        String lastName = scanner.nextLine();
+        System.out.print("Enter Email: ");
+        String email = scanner.nextLine();
+
+        return new Teacher(0, firstName, lastName, email);
+    }
+
+
+    public void updateStudentInformation() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter Student ID: ");
+        int studentId = scanner.nextInt();
+        scanner.nextLine(); 
+
+        System.out.print("Enter First Name: ");
+        String firstName = scanner.nextLine();
+        System.out.print("Enter Last Name: ");
+        String lastName = scanner.nextLine();
+        System.out.print("Enter Date of Birth (YYYY-MM-DD): ");
+        String dateOfBirthString = scanner.nextLine();
+        LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString);
+        System.out.print("Enter Email: ");
+        String email = scanner.nextLine();
+        System.out.print("Enter Phone Number: ");
+        String phoneNumber = scanner.nextLine();
+
+        Student updatedStudent = new Student(studentId, firstName, lastName, dateOfBirth, email, phoneNumber);
+        
+        try {
+            studentServiceProvider.updateStudentInDatabase(updatedStudent);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+
+
+  
+    private Student getUpdatedStudentInformation(Student existingStudent) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter updated First Name: ");
+        String updatedFirstName = scanner.nextLine();
+        
+        System.out.print("Enter updated Last Name: ");
+        String updatedLastName = scanner.nextLine();
+        
+        System.out.print("Enter updated Date of Birth (YYYY-MM-DD): ");
+        String updatedDateOfBirthString = scanner.nextLine();
+        LocalDate updatedDateOfBirth = LocalDate.parse(updatedDateOfBirthString);
+        
+        System.out.print("Enter updated Email: ");
+        String updatedEmail = scanner.nextLine();
+        
+        System.out.print("Enter updated Phone Number: ");
+        String updatedPhoneNumber = scanner.nextLine();
+
+        return new Student(
+                existingStudent.getStudentId(),
+                updatedFirstName,
+                updatedLastName,
+                updatedDateOfBirth,
+                updatedEmail,
+                updatedPhoneNumber
+        );
+    }
 
     public void handleException(Exception e) {
     	System.out.println(e);
