@@ -49,4 +49,13 @@ public class Enrollment {
     public void setEnrollmentDate(Date enrollmentDate) {
         this.enrollmentDate = enrollmentDate;
     }
+    @Override
+    public String toString() {
+        return "Enrollment{" +
+                "enrollmentId=" + enrollmentId +
+                ", studentId=" + studentId +
+                ", courseId=" + courseId +
+                ", enrollmentDate=" + enrollmentDate +
+                '}';
+    }
 }

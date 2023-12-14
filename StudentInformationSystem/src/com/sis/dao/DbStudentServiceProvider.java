@@ -85,6 +85,7 @@ public class DbStudentServiceProvider implements StudentServiceProvider {
         }
     }
 
+
     @Override
     public List<Course> getEnrolledCourses(Student student) throws StudentNotFoundException {
         try {
@@ -102,6 +103,52 @@ public class DbStudentServiceProvider implements StudentServiceProvider {
         } catch (SQLException e) {
             handleSQLException(e, "getEnrolledCourses");
             return new ArrayList<>();
+        }
+    }
+    public void addCourseToDatabase(Course course) {
+        try {
+            // Retrieve a valid teacher_id dynamically
+            int validTeacherId = getValidTeacherId();
+
+            String addCourseQuery = "INSERT INTO Courses (course_name, credits, teacher_id) VALUES (?, ?, ?)";
+            try (PreparedStatement addCourseStatement = connection.prepareStatement(addCourseQuery, Statement.RETURN_GENERATED_KEYS)) {
+                addCourseStatement.setString(1, course.getCourseName());
+                addCourseStatement.setInt(2, course.getCredits());
+                addCourseStatement.setInt(3, validTeacherId); // Use the retrieved valid teacher_id
+
+                int affectedRows = addCourseStatement.executeUpdate();
+
+                if (affectedRows == 0) {
+                    throw new SQLException("Adding course failed, no rows affected.");
+                }
+
+                try (ResultSet generatedKeys = addCourseStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int courseId = generatedKeys.getInt(1);
+                        course.setCourseId(courseId);
+                    } else {
+                        throw new SQLException("Adding course failed, no ID obtained.");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleSQLException(e, "addCourseToDatabase");
+        }
+    }
+
+    // Example of a method to retrieve a valid teacher_id
+    private int getValidTeacherId() throws SQLException {
+        // Implement the logic to retrieve a valid teacher_id, e.g., from the teacher table
+        // For simplicity, let's assume the first teacher in the table
+        String getTeacherIdQuery = "SELECT teacher_id FROM Teacher LIMIT 1";
+        try (PreparedStatement getTeacherIdStatement = connection.prepareStatement(getTeacherIdQuery)) {
+            try (ResultSet resultSet = getTeacherIdStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("teacher_id");
+                } else {
+                    throw new SQLException("No teacher found.");
+                }
+            }
         }
     }
 

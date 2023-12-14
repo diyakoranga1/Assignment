@@ -66,17 +66,21 @@ public class SISController {
     }
 
  
+    public void addCourseToDatabase(Course course) {
+        try {
+            studentServiceProvider.addCourseToDatabase(course);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
 
     public void enrollInCourse(int studentId, int courseId) {
         try {
             Student student = studentServiceProvider.getStudentById(studentId);
             Course course = studentServiceProvider.getCourseById(courseId);
 
-            // Perform the enrollment logic here, for example:
             if (student != null && course != null) {
-                // Check if the student is not already enrolled in the course
                 if (!studentServiceProvider.isStudentEnrolledInCourse(studentId, courseId)) {
-                    // Enroll the student in the course
                     studentServiceProvider.enrollStudentInCourse(student, course);
 
                     System.out.println("Student with ID " + studentId + " enrolled in course with ID " + courseId);

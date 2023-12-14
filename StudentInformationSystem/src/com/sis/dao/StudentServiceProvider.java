@@ -20,7 +20,7 @@ public interface StudentServiceProvider {
             throws StudentNotFoundException, PaymentValidationException;
 
     List<Course> getEnrolledCourses(Student student) throws StudentNotFoundException;
-
+    void addCourseToDatabase(Course course);
     void recordPayment(Student student, BigDecimal amount, LocalDateTime paymentDate)
             throws StudentNotFoundException, PaymentValidationException;
 

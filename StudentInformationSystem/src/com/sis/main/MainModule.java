@@ -51,15 +51,19 @@ public class MainModule {
                             sisController.displayStudentInfo(allStudents);
                             break;
                         case 3:
-                        	  System.out.print("Enter Course ID: ");
-                        	    int courseIdForEnrollment = scanner.nextInt();
+                        	   System.out.print("Enter Course Name: ");
+                               String courseName = scanner.nextLine();
+                               System.out.print("Enter Course Credits: ");
+                               int credits = scanner.nextInt();
 
-                        	    // Ask for Student ID
-                        	    System.out.print("Enter Student ID: ");
-                        	    int studentIdForEnrollment = scanner.nextInt();
+                               Course newCourse = new Course(0, courseName, credits, 0);
+                               sisController.addCourseToDatabase(newCourse);
 
-                        	    sisController.enrollInCourse(studentIdForEnrollment, courseIdForEnrollment);
-                        	    break;
+                               // Enroll a student in the newly added course
+                               System.out.print("Enter Student ID: ");
+                               int studentIdForEnrollment = scanner.nextInt();
+                               sisController.enrollInCourse(studentIdForEnrollment, newCourse.getCourseId());
+                               break;
                         case 4:
                             System.out.print("Enter Student ID: ");
                             int studentId = scanner.nextInt();
