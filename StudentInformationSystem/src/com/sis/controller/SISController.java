@@ -1,0 +1,187 @@
+package com.sis.controller;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Scanner;
+
+import com.sis.dao.StudentServiceProvider;
+import com.sis.entity.Course;
+import com.sis.entity.Payment;
+import com.sis.entity.Student;
+
+public class SISController {
+
+    private StudentServiceProvider studentServiceProvider;
+
+    public SISController(StudentServiceProvider studentServiceProvider) {
+        this.studentServiceProvider = studentServiceProvider;
+    }
+
+    public Student getStudentInformation() {
+        @SuppressWarnings("resource")
+		Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter Student ID: ");
+        int studentId = scanner.nextInt();
+        scanner.nextLine(); 
+
+        System.out.print("Enter First Name: ");
+        String firstName = scanner.nextLine();
+        System.out.print("Enter Last Name: ");
+        String lastName = scanner.nextLine();
+        System.out.print("Enter Date of Birth (YYYY-MM-DD): ");
+        String dateOfBirthString = scanner.nextLine();
+        LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString);
+        System.out.print("Enter Email: ");
+        String email = scanner.nextLine();
+        System.out.print("Enter Phone Number: ");
+        String phoneNumber = scanner.nextLine();
+
+        return new Student(studentId, firstName, lastName, dateOfBirth, email, phoneNumber);
+    }
+
+    public void addStudentToDatabase(Student student) {
+        try {
+            studentServiceProvider.addStudentToDatabase(student);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    public List<Student> getAllStudentsFromDatabase() {
+        try {
+            return studentServiceProvider.getAllStudentsFromDatabase();
+        } catch (Exception e) {
+            handleException(e);
+            return null;
+        }
+    }
+
+    public void displayStudentInfo(List<Student> students) {
+        for (Student student : students) {
+            System.out.println(student.toString());
+        }
+    }
+
+ 
+
+    public void enrollInCourse(int studentId, int courseId) {
+        try {
+            Student student = studentServiceProvider.getStudentById(studentId);
+            Course course = studentServiceProvider.getCourseById(courseId);
+
+            // Perform the enrollment logic here, for example:
+            if (student != null && course != null) {
+                // Check if the student is not already enrolled in the course
+                if (!studentServiceProvider.isStudentEnrolledInCourse(studentId, courseId)) {
+                    // Enroll the student in the course
+                    studentServiceProvider.enrollStudentInCourse(student, course);
+
+                    System.out.println("Student with ID " + studentId + " enrolled in course with ID " + courseId);
+                } else {
+                    System.out.println("Student is already enrolled in the course.");
+                }
+            } else {
+                System.out.println("Student or course not found.");
+            }
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+
+    public List<Course> getEnrolledCourses(int studentId) {
+        try {
+            Student student = studentServiceProvider.getStudentById(studentId);
+            return studentServiceProvider.getEnrolledCourses(student);
+        } catch (Exception e) {
+            handleException(e);
+            return null;
+        }
+    }
+
+    public void makePayment(int studentId, BigDecimal amount, LocalDate paymentDate) {
+        try {
+            Student student = studentServiceProvider.getStudentById(studentId);
+            studentServiceProvider.makePayment(student, amount, paymentDate);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    public List<Payment> getPayments(int studentId) {
+        try {
+            Student student = studentServiceProvider.getStudentById(studentId);
+            return studentServiceProvider.getPayments(student);
+        } catch (Exception e) {
+            handleException(e);
+            return null;
+        }
+    }
+
+    public List<Student> getEnrolledStudentsForCourse(int courseId) {
+        try {
+            Course course = studentServiceProvider.getCourseById(courseId);
+            return studentServiceProvider.getEnrolledStudentsForCourse(course);
+        } catch (Exception e) {
+            handleException(e);
+            return null;
+        }
+    }
+
+    public Student getStudentById(int studentId) {
+        try {
+            return studentServiceProvider.getStudentById(studentId);
+        } catch (Exception e) {
+            handleException(e);
+            return null;
+        }
+    }
+
+    public void displayEnrolledCoursesForStudent(List<Course> enrolledCourses) {
+        for (Course course : enrolledCourses) {
+            System.out.println(course.toString());
+        }
+    }
+
+    public void displayPayments(List<Payment> payments) {
+        for (Payment payment : payments) {
+            System.out.println(payment.toString());
+        }
+    }
+
+    public void generateEnrollmentReportForCourse(Course course) {
+        try {
+            List<Student> enrolledStudents = studentServiceProvider.getEnrolledStudentsForCourse(course);
+            System.out.println("Enrolled Students for Course " + course.getCourseId() + ":");
+            displayStudentInfo(enrolledStudents);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    public void assignTeacherToCourse(int teacherId, int courseId) {
+        try {
+            studentServiceProvider.assignTeacherToCourse(teacherId, courseId);
+            System.out.println("Teacher assigned successfully.");
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    public void recordPayment(int studentId, BigDecimal amount, LocalDateTime paymentDate) {
+        try {
+            Student student = studentServiceProvider.getStudentById(studentId);
+            studentServiceProvider.recordPayment(student, amount, paymentDate);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+
+    public void handleException(Exception e) {
+    	System.out.println(e);
+    }
+}
