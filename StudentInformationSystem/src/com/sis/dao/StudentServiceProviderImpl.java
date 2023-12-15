@@ -18,14 +18,59 @@ import com.sis.entity.Student;
 import com.sis.entity.Teacher;
 import com.sis.exception.*;
 
-public class DbStudentServiceProvider implements StudentServiceProvider {
+public class StudentServiceProviderImpl implements StudentServiceProvider {
 
     private Connection connection;
 
-    public DbStudentServiceProvider(Connection connection) {
+    public StudentServiceProviderImpl(Connection connection) {
         this.connection = connection;
     }
+    public void addStudentToDatabase(Student student)  {
+        try {
+            String addStudentQuery = "INSERT INTO Students (first_name, last_name, date_of_birth, email, phone_number) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement addStudentStatement = connection.prepareStatement(addStudentQuery, Statement.RETURN_GENERATED_KEYS)) {
+                addStudentStatement.setString(1, student.getFirstName());
+                addStudentStatement.setString(2, student.getLastName());
+                addStudentStatement.setDate(3, java.sql.Date.valueOf(student.getDateOfBirth()));
+                addStudentStatement.setString(4, student.getEmail());
+                addStudentStatement.setString(5, student.getPhoneNumber());
 
+                int affectedRows = addStudentStatement.executeUpdate();
+
+                if (affectedRows == 0) {
+                    throw new SQLException("Adding student failed, no rows affected.");
+                }
+
+                try (ResultSet generatedKeys = addStudentStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int studentId = generatedKeys.getInt(1);
+                        student.setStudentId(studentId);
+                    } else {
+                        throw new SQLException("Adding student failed, no ID obtained.");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleSQLException(e, "addStudentToDatabase");
+        }
+    }
+    
+    public List<Student> getAllStudentsFromDatabase() throws SQLException {
+        List<Student> students = new ArrayList<>();
+        String getAllStudentsQuery = "SELECT * FROM Students";
+
+        try (PreparedStatement getAllStudentsStatement = connection.prepareStatement(getAllStudentsQuery)) {
+            try (ResultSet resultSet = getAllStudentsStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Student student = constructStudentFromResultSet(resultSet);
+                    students.add(student);
+                }
+            }
+        }
+
+        return students;
+    }
+    
     @Override
     public void enrollInCourse(Student student, Course course)
             throws DuplicateEnrollmentException, CourseNotFoundException, StudentNotFoundException,
@@ -57,36 +102,7 @@ public class DbStudentServiceProvider implements StudentServiceProvider {
             throw new RuntimeException("Error checking enrollment status", e);
         }
     }
-
-    @Override
-    public void enrollStudentInCourse(Student student, Course course) {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO enrollments (student_id, course_id) VALUES (?, ?)")) {
-            statement.setInt(1, student.getStudentId());
-            statement.setInt(2, course.getCourseId());
-
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Error enrolling student in course", e);
-        }
-    }
-    @Override
-    public void makePayment(Student student, BigDecimal amount, LocalDate paymentDate)
-            throws StudentNotFoundException, PaymentValidationException {
-        try {
-            String paymentQuery = "INSERT INTO Payments (student_id, amount, payment_date) VALUES (?, ?, ?)";
-            try (PreparedStatement paymentStatement = connection.prepareStatement(paymentQuery)) {
-                paymentStatement.setInt(1, student.getStudentId());
-                paymentStatement.setBigDecimal(2, amount);
-                paymentStatement.setDate(3, java.sql.Date.valueOf(paymentDate));
-                paymentStatement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            handleSQLException(e, "makePayment");
-        }
-    }
-
-
+    
     @Override
     public List<Course> getEnrolledCourses(Student student) throws StudentNotFoundException {
         try {
@@ -106,6 +122,21 @@ public class DbStudentServiceProvider implements StudentServiceProvider {
             return new ArrayList<>();
         }
     }
+    
+    @Override
+    public void enrollStudentInCourse(Student student, Course course) {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "INSERT INTO enrollments (student_id, course_id) VALUES (?, ?)")) {
+            statement.setInt(1, student.getStudentId());
+            statement.setInt(2, course.getCourseId());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error enrolling student in course", e);
+        }
+    }
+
+ 
     public void addCourseToDatabase(Course course) {
         try {
             int validTeacherId = getValidTeacherId();
@@ -212,6 +243,23 @@ public class DbStudentServiceProvider implements StudentServiceProvider {
     private void handleSQLException(SQLException e, String operation) {
         e.printStackTrace();
     }
+    
+    @Override
+    public void makePayment(Student student, BigDecimal amount, LocalDate paymentDate)
+            throws StudentNotFoundException, PaymentValidationException {
+        try {
+            String paymentQuery = "INSERT INTO Payments (student_id, amount, payment_date) VALUES (?, ?, ?)";
+            try (PreparedStatement paymentStatement = connection.prepareStatement(paymentQuery)) {
+                paymentStatement.setInt(1, student.getStudentId());
+                paymentStatement.setBigDecimal(2, amount);
+                paymentStatement.setDate(3, java.sql.Date.valueOf(paymentDate));
+                paymentStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            handleSQLException(e, "makePayment");
+        }
+    }
+
 
     private Course constructCourseFromResultSet(ResultSet resultSet) throws SQLException {
         int courseId = resultSet.getInt("course_id");
@@ -247,6 +295,32 @@ public class DbStudentServiceProvider implements StudentServiceProvider {
         }
     }
     @Override
+    public List<Teacher> getAllTeachersFromDatabase() throws SQLException {
+        List<Teacher> teachers = new ArrayList<>();
+        String getAllTeachersQuery = "SELECT * FROM Teacher";
+
+        try (PreparedStatement getAllTeachersStatement = connection.prepareStatement(getAllTeachersQuery)) {
+            try (ResultSet resultSet = getAllTeachersStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Teacher teacher = constructTeacherFromResultSet(resultSet);
+                    teachers.add(teacher);
+                }
+            }
+        }
+
+        return teachers;
+    }
+
+    private Teacher constructTeacherFromResultSet(ResultSet resultSet) throws SQLException {
+        int teacherId = resultSet.getInt("teacher_id");
+        String firstName = resultSet.getString("first_name");
+        String lastName = resultSet.getString("last_name");
+        String email = resultSet.getString("email");
+
+        return new Teacher(teacherId, firstName, lastName, email);
+    }
+    
+    @Override
     public void assignTeacherToCourse(int teacherId, int courseId) throws CourseNotFoundException, TeacherNotFoundException {
         try {
             String assignTeacherQuery = "UPDATE Courses SET teacher_id = ? WHERE course_id = ?";
@@ -278,56 +352,10 @@ public class DbStudentServiceProvider implements StudentServiceProvider {
             }
         } catch (SQLException e) {
             handleSQLException(e, "getCourseById");
-            return null; // Handle the exception according to your application's requirements
+            return null; 
         }
-    }
-    public void addStudentToDatabase(Student student)  {
-        try {
-            String addStudentQuery = "INSERT INTO Students (first_name, last_name, date_of_birth, email, phone_number) VALUES (?, ?, ?, ?, ?)";
-            try (PreparedStatement addStudentStatement = connection.prepareStatement(addStudentQuery, Statement.RETURN_GENERATED_KEYS)) {
-                addStudentStatement.setString(1, student.getFirstName());
-                addStudentStatement.setString(2, student.getLastName());
-                addStudentStatement.setDate(3, java.sql.Date.valueOf(student.getDateOfBirth()));
-                addStudentStatement.setString(4, student.getEmail());
-                addStudentStatement.setString(5, student.getPhoneNumber());
-
-                int affectedRows = addStudentStatement.executeUpdate();
-
-                if (affectedRows == 0) {
-                    throw new SQLException("Adding student failed, no rows affected.");
-                }
-
-                try (ResultSet generatedKeys = addStudentStatement.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        int studentId = generatedKeys.getInt(1);
-                        student.setStudentId(studentId);
-                    } else {
-                        throw new SQLException("Adding student failed, no ID obtained.");
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            handleSQLException(e, "addStudentToDatabase");
-        }
-    }
-    public List<Student> getAllStudentsFromDatabase() throws SQLException {
-        List<Student> students = new ArrayList<>();
-        String getAllStudentsQuery = "SELECT * FROM Students";
-
-        try (PreparedStatement getAllStudentsStatement = connection.prepareStatement(getAllStudentsQuery)) {
-            try (ResultSet resultSet = getAllStudentsStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    Student student = constructStudentFromResultSet(resultSet);
-                    students.add(student);
-                }
-            }
-        }
-
-        return students;
     }
     
-
-   
 
     @Override
     public void displayCourseInfo(List<Course> courses) {
@@ -366,8 +394,31 @@ public class DbStudentServiceProvider implements StudentServiceProvider {
         } catch (SQLException e) {
             handleSQLException(e, "updateStudentInDatabase");
         }
+    }
 
-}
+    @Override
+    public Teacher getTeacherById(int teacherId) throws SQLException {
+        String query = "SELECT teacher_id, first_name, last_name, email FROM teacher WHERE teacher_id = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, teacherId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new Teacher(
+                            resultSet.getInt("teacher_id"),
+                            resultSet.getString("first_name"),
+                            resultSet.getString("last_name"),
+                            resultSet.getString("email")
+                    );
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
+
+
 
     @Override
     public List<Course> getAllCoursesFromDatabase() throws SQLException {
@@ -385,33 +436,7 @@ public class DbStudentServiceProvider implements StudentServiceProvider {
 
         return courses;
     }
-
-    @Override
-    public List<Teacher> getAllTeachersFromDatabase() throws SQLException {
-        List<Teacher> teachers = new ArrayList<>();
-        String getAllTeachersQuery = "SELECT * FROM Teacher";
-
-        try (PreparedStatement getAllTeachersStatement = connection.prepareStatement(getAllTeachersQuery)) {
-            try (ResultSet resultSet = getAllTeachersStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    Teacher teacher = constructTeacherFromResultSet(resultSet);
-                    teachers.add(teacher);
-                }
-            }
-        }
-
-        return teachers;
-    }
-
-    private Teacher constructTeacherFromResultSet(ResultSet resultSet) throws SQLException {
-        int teacherId = resultSet.getInt("teacher_id");
-        String firstName = resultSet.getString("first_name");
-        String lastName = resultSet.getString("last_name");
-        String email = resultSet.getString("email");
-
-        return new Teacher(teacherId, firstName, lastName, email);
-    }
-
+ 
 	
 }
 
