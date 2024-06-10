@@ -1454,3 +1454,554 @@ namespace CarRentalSystem.Tests
         }
     }
 }
+from util.DBConnUtil import DBConnUtil
+from exception import DatabaseConnectionException, EmployeeNotFoundException, InvalidInputException
+from entity.employee import Employee
+
+class EmployeeService:
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()  # Assuming DBConnUtil provides a method to get the database connection
+
+    def get_employee_by_id(self, employee_id):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Employee WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            employee_data = cursor.fetchone()
+            cursor.close()
+            if employee_data:
+                return Employee(*employee_data)
+            else:
+                raise EmployeeNotFoundException("Employee not found.")
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching employee data from database.") from e
+
+    def get_all_employees(self):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Employee"
+            cursor.execute(query)
+            employees_data = cursor.fetchall()
+            cursor.close()
+            employees = []
+            for employee_data in employees_data:
+                employees.append(Employee(*employee_data))
+            return employees
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching employees data from database.") from e
+
+    def add_employee(self, first_name, last_name, date_of_birth, gender, email, phone_number, address, position, joining_date, termination_date):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO Employee (FirstName, LastName, DateOfBirth, Gender, Email, PhoneNumber, Address, Position, JoiningDate, TerminationDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(query, (first_name, last_name, date_of_birth, gender, email, phone_number, address, position, joining_date, termination_date))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error adding employee to database.") from e
+
+    def update_employee(self, employee_id, first_name, last_name, date_of_birth, gender, email, phone_number, address, position, joining_date, termination_date):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "UPDATE Employee SET FirstName = %s, LastName = %s, DateOfBirth = %s, Gender = %s, Email = %s, PhoneNumber = %s, Address = %s, Position = %s, JoiningDate = %s, TerminationDate = %s WHERE EmployeeID = %s"
+            cursor.execute(query, (first_name, last_name, date_of_birth, gender, email, phone_number, address, position, joining_date, termination_date, employee_id))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error updating employee in database.") from e
+
+    def remove_employee(self, employee_id):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "DELETE FROM Employee WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error removing employee from database.") from e
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from service.EmployeeService import EmployeeService
+from service.PayrollService import PayrollService
+from service.TaxService import TaxService
+from service.FinancialRecordService import FinancialRecordService
+from exception.InvalidInputException import InvalidInputException
+from exception.DatabaseConnectionException import DatabaseConnectionException
+
+class MainModule:
+    def __init__(self):
+        self.employee_service = EmployeeService()
+        self.payroll_service = PayrollService()
+        self.tax_service = TaxService()
+        self.financial_record_service = FinancialRecordService()
+
+    def display_menu(self):
+        print("\n=== Payroll Management System ===")
+        print("1. Employee Menu")
+        print("2. Payroll Menu")
+        print("3. Tax Menu")
+        print("4. Financial Record Menu")
+        print("5. Exit")
+
+    def employee_menu(self):
+        while True:
+            print("\n=== Employee Menu ===")
+            print("1. Add Employee")
+            print("2. Get Employee by ID")
+            print("3. Get All Employees")
+            print("4. Update Employee")
+            print("5. Remove Employee")
+            print("6. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.add_employee()
+            elif choice == "2":
+                self.get_employee_by_id()
+            elif choice == "3":
+                self.get_all_employees()
+            elif choice == "4":
+                self.update_employee()
+            elif choice == "5":
+                self.remove_employee()
+            elif choice == "6":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def payroll_menu(self):
+        while True:
+            print("\n=== Payroll Menu ===")
+            print("1. Generate Payroll")
+            print("2. Get Payroll by ID")
+            print("3. Get Payrolls for Employee")
+            print("4. Get Payrolls for Period")
+            print("5. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.generate_payroll()
+            elif choice == "2":
+                self.get_payroll_by_id()
+            elif choice == "3":
+                self.get_payrolls_for_employee()
+            elif choice == "4":
+                self.get_payrolls_for_period()
+            elif choice == "5":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def tax_menu(self):
+        while True:
+            print("\n=== Tax Menu ===")
+            print("1. Calculate Tax")
+            print("2. Get Tax by ID")
+            print("3. Get Taxes for Employee")
+            print("4. Get Taxes for Year")
+            print("5. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.calculate_tax()
+            elif choice == "2":
+                self.get_tax_by_id()
+            elif choice == "3":
+                self.get_taxes_for_employee()
+            elif choice == "4":
+                self.get_taxes_for_year()
+            elif choice == "5":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def financial_record_menu(self):
+        while True:
+            print("\n=== Financial Record Menu ===")
+            print("1. Add Financial Record")
+            print("2. Get Financial Record by ID")
+            print("3. Get Financial Records for Employee")
+            print("4. Get Financial Records for Date")
+            print("5. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.add_financial_record()
+            elif choice == "2":
+                self.get_financial_record_by_id()
+            elif choice == "3":
+                self.get_financial_records_for_employee()
+            elif choice == "4":
+                self.get_financial_records_for_date()
+            elif choice == "5":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def add_employee(self):
+        try:
+            # Gather employee details from user input
+            first_name = input("Enter first name: ")
+            last_name = input("Enter last name: ")
+            date_of_birth = input("Enter date of birth (YYYY-MM-DD): ")
+            gender = input("Enter gender: ")
+            email = input("Enter email address: ")
+            phone_number = input("Enter phone number: ")
+            address = input("Enter address: ")
+            position = input("Enter position: ")
+            joining_date = input("Enter joining date (YYYY-MM-DD): ")
+            termination_date = input("Enter termination date (if any, otherwise press Enter): ")
+
+            # Add employee using the service
+            employee_data = {
+                "first_name": first_name,
+                "last_name": last_name,
+                "date_of_birth": date_of_birth,
+                "gender": gender,
+                "email": email,
+                "phone_number": phone_number,
+                "address": address,
+                "position": position,
+                "joining_date": joining_date,
+                "termination_date": termination_date
+            }
+            self.employee_service.add_employee(employee_data)
+            print("Employee added successfully!")
+        except InvalidInputException as e:
+            print(e)
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def generate_payroll(self):
+        try:
+            # Get employee ID and pay period dates from user input
+            employee_id = int(input("Enter employee ID: "))
+            start_date = input("Enter start date of pay period (YYYY-MM-DD): ")
+            end_date = input("Enter end date of pay period (YYYY-MM-DD): ")
+
+            # Generate payroll using the service
+            self.payroll_service.generate_payroll(employee_id, start_date, end_date)
+            print("Payroll generated successfully!")
+        except ValueError:
+            print("Invalid input for employee ID!")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def calculate_tax(self):
+        try:
+            # Get employee ID and tax year from user input
+            employee_id = int(input("Enter employee ID: "))
+            tax_year = int(input("Enter tax year: "))
+
+            # Calculate tax using the service
+            self.tax_service.calculate_tax(employee_id, tax_year)
+            print("Tax calculated successfully!")
+        except ValueError:
+            print("Invalid input for employee ID or tax year!")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def run(self):
+        while True:
+            self.display_menu()
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.employee_menu()
+            elif choice == "2":
+                self.payroll_menu()
+            elif choice == "3":
+                self.tax_menu()
+            elif choice == "4":
+                self.financial_record_menu()
+            elif choice == "5":
+                print("Exiting the application.")
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main_module = MainModule()
+    main_module.run()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def get_employee_by_id(self):
+        try:
+            # Get employee ID from user input
+            employee_id = int(input("Enter employee ID: "))
+
+            # Get employee details using the service
+            employee = self.employee_service.get_employee_by_id(employee_id)
+            if employee:
+                print("Employee Details:")
+                print(employee)
+            else:
+                print("Employee not found.")
+        except ValueError:
+            print("Invalid input for employee ID.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def get_all_employees(self):
+        try:
+            # Get all employees using the service
+            employees = self.employee_service.get_all_employees()
+            if employees:
+                print("All Employees:")
+                for employee in employees:
+                    print(employee)
+            else:
+                print("No employees found.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def update_employee(self):
+        try:
+            # Gather employee details from user input
+            employee_id = int(input("Enter employee ID: "))
+            first_name = input("Enter first name: ")
+            last_name = input("Enter last name: ")
+            date_of_birth = input("Enter date of birth (YYYY-MM-DD): ")
+            gender = input("Enter gender: ")
+            email = input("Enter email address: ")
+            phone_number = input("Enter phone number: ")
+            address = input("Enter address: ")
+            position = input("Enter position: ")
+            joining_date = input("Enter joining date (YYYY-MM-DD): ")
+            termination_date = input("Enter termination date (if any, otherwise press Enter): ")
+
+            # Update employee using the service
+            employee_data = {
+                "employee_id": employee_id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "date_of_birth": date_of_birth,
+                "gender": gender,
+                "email": email,
+                "phone_number": phone_number,
+                "address": address,
+                "position": position,
+                "joining_date": joining_date,
+                "termination_date": termination_date
+            }
+            self.employee_service.update_employee(employee_data)
+            print("Employee updated successfully!")
+        except InvalidInputException as e:
+            print(e)
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def remove_employee(self):
+        try:
+            # Get employee ID from user input
+            employee_id = int(input("Enter employee ID: "))
+
+            # Remove employee using the service
+            self.employee_service.remove_employee(employee_id)
+            print("Employee removed successfully!")
+        except ValueError:
+            print("Invalid input for employee ID.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+
+
+
+
+
+
+
+
+
+    def get_payroll_by_id(self):
+        try:
+            # Get payroll ID from user input
+            payroll_id = int(input("Enter payroll ID: "))
+
+            # Get payroll details using the service
+            payroll = self.payroll_service.get_payroll_by_id(payroll_id)
+            if payroll:
+                print("Payroll Details:")
+                print(payroll)
+            else:
+                print("Payroll not found.")
+        except ValueError:
+            print("Invalid input for payroll ID.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def get_payrolls_for_employee(self):
+        try:
+            # Get employee ID from user input
+            employee_id = int(input("Enter employee ID: "))
+
+            # Get payroll details for the employee using the service
+            payrolls = self.payroll_service.get_payrolls_for_employee(employee_id)
+            if payrolls:
+                print("Payrolls for Employee:")
+                for payroll in payrolls:
+                    print(payroll)
+            else:
+                print("No payrolls found for the employee.")
+        except ValueError:
+            print("Invalid input for employee ID.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def get_payrolls_for_period(self):
+        try:
+            # Get start and end dates of the pay period from user input
+            start_date = input("Enter start date of pay period (YYYY-MM-DD): ")
+            end_date = input("Enter end date of pay period (YYYY-MM-DD): ")
+
+            # Get payrolls for the specified period using the service
+            payrolls = self.payroll_service.get_payrolls_for_period(start_date, end_date)
+            if payrolls:
+                print("Payrolls for Period:")
+                for payroll in payrolls:
+                    print(payroll)
+            else:
+                print("No payrolls found for the specified period.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def get_tax_by_id(self):
+        try:
+            # Get tax ID from user input
+            tax_id = int(input("Enter tax ID: "))
+
+            # Get tax details using the service
+            tax = self.tax_service.get_tax_by_id(tax_id)
+            if tax:
+                print("Tax Details:")
+                print(tax)
+            else:
+                print("Tax not found.")
+        except ValueError:
+            print("Invalid input for tax ID.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def get_taxes_for_employee(self):
+        try:
+            # Get employee ID from user input
+            employee_id = int(input("Enter employee ID: "))
+
+            # Get taxes for the employee using the service
+            taxes = self.tax_service.get_taxes_for_employee(employee_id)
+            if taxes:
+                print("Taxes for Employee:")
+                for tax in taxes:
+                    print(tax)
+            else:
+                print("No taxes found for the employee.")
+        except ValueError:
+            print("Invalid input for employee ID.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def get_taxes_for_year(self):
+        try:
+            # Get employee ID and tax year from user input
+            employee_id = int(input("Enter employee ID: "))
+            tax_year = int(input("Enter tax year: "))
+
+            # Get taxes for the specified year using the service
+            taxes = self.tax_service.get_taxes_for_year(employee_id, tax_year)
+            if taxes:
+                print("Taxes for Year:")
+                for tax in taxes:
+                    print(tax)
+            else:
+                print("No taxes found for the specified year.")
+        except ValueError:
+            print("Invalid input for employee ID or tax year.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def get_financial_record_by_id(self):
+        try:
+            # Get financial record ID from user input
+            record_id = int(input("Enter financial record ID: "))
+
+            # Get financial record details using the service
+            record = self.financial_record_service.get_financial_record_by_id(record_id)
+            if record:
+                print("Financial Record Details:")
+                print(record)
+            else:
+                print("Financial record not found.")
+        except ValueError:
+            print("Invalid input for financial record ID.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def get_financial_records_for_employee(self):
+        try:
+            # Get employee ID from user input
+            employee_id = int(input("Enter employee ID: "))
+
+            # Get financial records for the employee using the service
+            records = self.financial_record_service.get_financial_records_for_employee(employee_id)
+            if records:
+                print("Financial Records for Employee:")
+                for record in records:
+                    print(record)
+            else:
+                print("No financial records found for the employee.")
+        except ValueError:
+            print("Invalid input for employee ID.")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def get_financial_records_for_date(self):
+        try:
+            # Get date from user input
+            date = input("Enter date (YYYY-MM-DD): ")
+
+            # Get financial records for the date using the service
+            records = self.financial_record_service.get_financial_records_for_date(date)
+            if records:
+                print("Financial Records for Date:")
+                for record in records:
+                    print(record)
+            else:
+                print("No financial records found for the specified date.")
+        except DatabaseConnectionException as e:
+            print(e)
