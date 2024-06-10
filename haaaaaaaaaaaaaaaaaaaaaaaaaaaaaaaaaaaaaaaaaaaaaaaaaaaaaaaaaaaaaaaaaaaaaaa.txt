@@ -1,0 +1,1340 @@
+Certainly! Here's the complete `Employee` entity class with private attributes, constructor, and getter/setter methods in Python:
+
+```python
+class Employee:
+    def __init__(self, employee_id, first_name, last_name, date_of_birth, gender, email, phone_number, address, position, joining_date, termination_date=None):
+        self.__employee_id = employee_id
+        self.__first_name = first_name
+        self.__last_name = last_name
+        self.__date_of_birth = date_of_birth
+        self.__gender = gender
+        self.__email = email
+        self.__phone_number = phone_number
+        self.__address = address
+        self.__position = position
+        self.__joining_date = joining_date
+        self.__termination_date = termination_date
+
+    def get_employee_id(self):
+        return self.__employee_id
+
+    def set_employee_id(self, employee_id):
+        self.__employee_id = employee_id
+
+    def get_first_name(self):
+        return self.__first_name
+
+    def set_first_name(self, first_name):
+        self.__first_name = first_name
+
+    def get_last_name(self):
+        return self.__last_name
+
+    def set_last_name(self, last_name):
+        self.__last_name = last_name
+
+    def get_date_of_birth(self):
+        return self.__date_of_birth
+
+    def set_date_of_birth(self, date_of_birth):
+        self.__date_of_birth = date_of_birth
+
+    def get_gender(self):
+        return self.__gender
+
+    def set_gender(self, gender):
+        self.__gender = gender
+
+    def get_email(self):
+        return self.__email
+
+    def set_email(self, email):
+        self.__email = email
+
+    def get_phone_number(self):
+        return self.__phone_number
+
+    def set_phone_number(self, phone_number):
+        self.__phone_number = phone_number
+
+    def get_address(self):
+        return self.__address
+
+    def set_address(self, address):
+        self.__address = address
+
+    def get_position(self):
+        return self.__position
+
+    def set_position(self, position):
+        self.__position = position
+
+    def get_joining_date(self):
+        return self.__joining_date
+
+    def set_joining_date(self, joining_date):
+        self.__joining_date = joining_date
+
+    def get_termination_date(self):
+        return self.__termination_date
+
+    def set_termination_date(self, termination_date):
+        self.__termination_date = termination_date
+```
+
+This class represents an employee entity with attributes like employee ID, name, date of birth, gender, contact details, position, joining date, and termination date. Private attributes ensure encapsulation, and getter/setter methods provide controlled access to these attributes. If you have any further questions or need additional assistance, feel free to ask!
+
+
+Certainly! Here's the complete `Payroll` entity class with private attributes, constructor, and getter/setter methods in Python:
+
+```python
+class Payroll:
+    def __init__(self, payroll_id, employee_id, pay_period_start_date, pay_period_end_date, basic_salary, overtime_pay, deductions, net_salary):
+        self.__payroll_id = payroll_id
+        self.__employee_id = employee_id
+        self.__pay_period_start_date = pay_period_start_date
+        self.__pay_period_end_date = pay_period_end_date
+        self.__basic_salary = basic_salary
+        self.__overtime_pay = overtime_pay
+        self.__deductions = deductions
+        self.__net_salary = net_salary
+
+    def get_payroll_id(self):
+        return self.__payroll_id
+
+    def set_payroll_id(self, payroll_id):
+        self.__payroll_id = payroll_id
+
+    def get_employee_id(self):
+        return self.__employee_id
+
+    def set_employee_id(self, employee_id):
+        self.__employee_id = employee_id
+
+    def get_pay_period_start_date(self):
+        return self.__pay_period_start_date
+
+    def set_pay_period_start_date(self, pay_period_start_date):
+        self.__pay_period_start_date = pay_period_start_date
+
+    def get_pay_period_end_date(self):
+        return self.__pay_period_end_date
+
+    def set_pay_period_end_date(self, pay_period_end_date):
+        self.__pay_period_end_date = pay_period_end_date
+
+    def get_basic_salary(self):
+        return self.__basic_salary
+
+    def set_basic_salary(self, basic_salary):
+        self.__basic_salary = basic_salary
+
+    def get_overtime_pay(self):
+        return self.__overtime_pay
+
+    def set_overtime_pay(self, overtime_pay):
+        self.__overtime_pay = overtime_pay
+
+    def get_deductions(self):
+        return self.__deductions
+
+    def set_deductions(self, deductions):
+        self.__deductions = deductions
+
+    def get_net_salary(self):
+        return self.__net_salary
+
+    def set_net_salary(self, net_salary):
+        self.__net_salary = net_salary
+```
+
+This class represents a payroll entity with attributes like payroll ID, employee ID, pay period start date, pay period end date, basic salary, overtime pay, deductions, and net salary. Private attributes ensure encapsulation, and getter/setter methods provide controlled access to these attributes. If you have any further questions or need additional assistance, feel free to ask!
+
+
+Certainly! Here's the complete `Tax` entity class with private attributes, constructor, and getter/setter methods in Python:
+
+```python
+class Tax:
+    def __init__(self, tax_id, employee_id, tax_year, taxable_income, tax_amount):
+        self.__tax_id = tax_id
+        self.__employee_id = employee_id
+        self.__tax_year = tax_year
+        self.__taxable_income = taxable_income
+        self.__tax_amount = tax_amount
+
+    def get_tax_id(self):
+        return self.__tax_id
+
+    def set_tax_id(self, tax_id):
+        self.__tax_id = tax_id
+
+    def get_employee_id(self):
+        return self.__employee_id
+
+    def set_employee_id(self, employee_id):
+        self.__employee_id = employee_id
+
+    def get_tax_year(self):
+        return self.__tax_year
+
+    def set_tax_year(self, tax_year):
+        self.__tax_year = tax_year
+
+    def get_taxable_income(self):
+        return self.__taxable_income
+
+    def set_taxable_income(self, taxable_income):
+        self.__taxable_income = taxable_income
+
+    def get_tax_amount(self):
+        return self.__tax_amount
+
+    def set_tax_amount(self, tax_amount):
+        self.__tax_amount = tax_amount
+```
+
+This class represents a tax entity with attributes like tax ID, employee ID, tax year, taxable income, and tax amount. Private attributes ensure encapsulation, and getter/setter methods provide controlled access to these attributes. If you have any further questions or need additional assistance, feel free to ask!
+Here's the complete `FinancialRecord` entity class with private attributes, constructor, and getter/setter methods in Python:
+
+```python
+class FinancialRecord:
+    def __init__(self, record_id, employee_id, record_date, description, amount, record_type):
+        self.__record_id = record_id
+        self.__employee_id = employee_id
+        self.__record_date = record_date
+        self.__description = description
+        self.__amount = amount
+        self.__record_type = record_type
+
+    def get_record_id(self):
+        return self.__record_id
+
+    def set_record_id(self, record_id):
+        self.__record_id = record_id
+
+    def get_employee_id(self):
+        return self.__employee_id
+
+    def set_employee_id(self, employee_id):
+        self.__employee_id = employee_id
+
+    def get_record_date(self):
+        return self.__record_date
+
+    def set_record_date(self, record_date):
+        self.__record_date = record_date
+
+    def get_description(self):
+        return self.__description
+
+    def set_description(self, description):
+        self.__description = description
+
+    def get_amount(self):
+        return self.__amount
+
+    def set_amount(self, amount):
+        self.__amount = amount
+
+    def get_record_type(self):
+        return self.__record_type
+
+    def set_record_type(self, record_type):
+        self.__record_type = record_type
+```
+
+This class represents a financial record entity with attributes like record ID, employee ID, record date, description, amount, and record type. Private attributes ensure encapsulation, and getter/setter methods provide controlled access to these attributes. If you have any further questions or need additional assistance, feel free to ask!
+
+from abc import ABC, abstractmethod
+
+class IEmployeeService(ABC):
+    @abstractmethod
+    def get_employee_by_id(self, employee_id):
+        pass
+    
+    @abstractmethod
+    def get_all_employees(self):
+        pass
+    
+    @abstractmethod
+    def add_employee(self, employee_data):
+        pass
+    
+    @abstractmethod
+    def update_employee(self, employee_data):
+        pass
+    
+    @abstractmethod
+    def remove_employee(self, employee_id):
+        pass
+
+
+from util.DBConnUtil import DBConnUtil
+from exception import DatabaseConnectionException, EmployeeNotFoundException, InvalidInputException
+from entity.employee import Employee
+
+class EmployeeService(IEmployeeService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()  # Assuming DBConnUtil provides a method to get the database connection
+
+    def get_employee_by_id(self, employee_id):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Employee WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            employee_data = cursor.fetchone()
+            cursor.close()
+            if employee_data:
+                return Employee(*employee_data)
+            else:
+                raise EmployeeNotFoundException("Employee not found.")
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching employee data from database.") from e
+
+    def get_all_employees(self):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Employee"
+            cursor.execute(query)
+            employees_data = cursor.fetchall()
+            cursor.close()
+            employees = []
+            for employee_data in employees_data:
+                employees.append(Employee(*employee_data))
+            return employees
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching employees data from database.") from e
+
+    def add_employee(self, employee_data):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO Employee (FirstName, LastName, DateOfBirth, Gender, Email, PhoneNumber, Address, Position, JoiningDate, TerminationDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(query, (employee_data.first_name, employee_data.last_name, employee_data.date_of_birth, employee_data.gender, employee_data.email, employee_data.phone_number, employee_data.address, employee_data.position, employee_data.joining_date, employee_data.termination_date))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error adding employee to database.") from e
+
+    def update_employee(self, employee_data):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "UPDATE Employee SET FirstName = %s, LastName = %s, DateOfBirth = %s, Gender = %s, Email = %s, PhoneNumber = %s, Address = %s, Position = %s, JoiningDate = %s, TerminationDate = %s WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_data.first_name, employee_data.last_name, employee_data.date_of_birth, employee_data.gender, employee_data.email, employee_data.phone_number, employee_data.address, employee_data.position, employee_data.joining_date, employee_data.termination_date, employee_data.employee_id))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error updating employee in database.") from e
+
+    def remove_employee(self, employee_id):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "DELETE FROM Employee WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error removing employee from database.") from e
+
+
+
+
+from abc import ABC, abstractmethod
+
+class IPayrollService(ABC):
+    @abstractmethod
+    def generate_payroll(self, employee_id, start_date, end_date):
+        pass
+    
+    @abstractmethod
+    def get_payroll_by_id(self, payroll_id):
+        pass
+    
+    @abstractmethod
+    def get_payrolls_for_employee(self, employee_id):
+        pass
+    
+    @abstractmethod
+    def get_payrolls_for_period(self, start_date, end_date):
+        pass
+
+
+
+from util.DBConnUtil import DBConnUtil
+from exception import DatabaseConnectionException, PayrollGenerationException
+
+class PayrollService(IPayrollService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()  # Assuming DBConnUtil provides a method to get the database connection
+
+    def generate_payroll(self, employee_id, start_date, end_date):
+        try:
+            # Retrieve employee details from the database
+            employee = self.get_employee_by_id(employee_id)
+            if not employee:
+                raise PayrollGenerationException("Employee not found.")
+
+            # Calculate basic salary based on employee position
+            basic_salary = self.calculate_basic_salary(employee['position'])
+
+            # Simulate overtime pay calculation
+            overtime_hours = self.calculate_overtime_hours(employee_id, start_date, end_date)
+            overtime_pay_rate = 1.5  # Assuming overtime pay rate
+            overtime_pay = overtime_hours * overtime_pay_rate
+
+            # Simulate deductions calculation
+            deductions = self.calculate_deductions(employee_id, start_date, end_date)
+
+            # Calculate net salary
+            net_salary = basic_salary + overtime_pay - deductions
+
+            # Insert payroll details into the database
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO Payroll (EmployeeID, PayPeriodStartDate, PayPeriodEndDate, BasicSalary, OvertimePay, Deductions, NetSalary) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(query, (employee_id, start_date, end_date, basic_salary, overtime_pay, deductions, net_salary))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise PayrollGenerationException("Error generating payroll.") from e
+
+    def get_payroll_by_id(self, payroll_id):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Payroll WHERE PayrollID = %s"
+            cursor.execute(query, (payroll_id,))
+            payroll_data = cursor.fetchone()
+            cursor.close()
+            return payroll_data  # Assuming this method returns the payroll data
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching payroll data from database.") from e
+
+    def get_payrolls_for_employee(self, employee_id):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Payroll WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            payrolls_data = cursor.fetchall()
+            cursor.close()
+            return payrolls_data  # Assuming this method returns the payrolls data for the given employee
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching payroll data from database.") from e
+
+    def get_payrolls_for_period(self, start_date, end_date):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Payroll WHERE PayPeriodStartDate >= %s AND PayPeriodEndDate <= %s"
+            cursor.execute(query, (start_date, end_date))
+            payrolls_data = cursor.fetchall()
+            cursor.close()
+            return payrolls_data  # Assuming this method returns the payrolls data for the given period
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching payroll data from database.") from e
+
+    def calculate_basic_salary(self, position):
+        # Assuming basic salary calculation based on employee position
+        salary_mapping = {
+            'Manager': 60000,
+            'Developer': 45000,
+            'Tester': 40000
+        }
+        return salary_mapping.get(position, 0)  # Return 0 if position not found
+
+    def calculate_overtime_hours(self, employee_id, start_date, end_date):
+        # Simulate overtime hours calculation based on employee's work log or timesheet
+        return 10  # Assuming 10 hours of overtime for demonstration
+
+    def calculate_deductions(self, employee_id, start_date, end_date):
+        # Simulate deductions calculation such as taxes, insurance, etc.
+        return 2000  # Assuming a fixed deduction amount for demonstration
+
+
+
+Certainly! Let's make the `calculate_overtime_hours` and `calculate_deductions` methods more realistic:
+
+```python
+from datetime import datetime, timedelta
+
+class PayrollService(IPayrollService):
+    # Previous methods...
+
+    def calculate_overtime_hours(self, employee_id, start_date, end_date):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT SUM(HoursWorked) FROM WorkLog WHERE EmployeeID = %s AND WorkDate BETWEEN %s AND %s"
+            cursor.execute(query, (employee_id, start_date, end_date))
+            total_hours_worked = cursor.fetchone()[0] or 0
+            cursor.close()
+
+            # Assuming standard working hours per week is 40
+            standard_hours_per_week = 40 * ((end_date - start_date).days // 7)
+            overtime_hours = max(total_hours_worked - standard_hours_per_week, 0)
+            return overtime_hours
+        except Exception as e:
+            raise PayrollGenerationException("Error calculating overtime hours.") from e
+
+    def calculate_deductions(self, employee_id, start_date, end_date):
+        try:
+            # Simulate tax deduction calculation based on employee's taxable income
+            taxable_income = self.calculate_taxable_income(employee_id, start_date.year)
+            tax_amount = self.calculate_tax_amount(taxable_income)
+            
+            # Simulate insurance deduction
+            insurance_deduction = 500  # Assuming a fixed insurance deduction amount
+
+            # Assuming other deductions such as health insurance, retirement contributions, etc.
+            other_deductions = 1000
+
+            total_deductions = tax_amount + insurance_deduction + other_deductions
+            return total_deductions
+        except Exception as e:
+            raise PayrollGenerationException("Error calculating deductions.") from e
+```
+
+In this updated implementation:
+- The `calculate_overtime_hours` method calculates overtime hours by querying the work log table for the specified employee and time period. It assumes a standard 40-hour workweek and calculates overtime hours based on the difference between actual hours worked and the standard hours.
+- The `calculate_deductions` method simulates deductions such as taxes, insurance, and other deductions based on the employee's taxable income. The tax calculation is assumed to be based on the taxable income for the year, and insurance and other deductions are assumed as fixed amounts.
+
+These adjustments make the methods more realistic by simulating actual calculations based on data from the database. Adjustments can be made based on your specific business logic and database schema. Let me know if you need further assistance!
+
+
+
+Sure, here's the tax service interface `ITaxService`:
+
+```python
+from abc import ABC, abstractmethod
+
+class ITaxService(ABC):
+    @abstractmethod
+    def calculate_tax(self, employee_id: int, tax_year: int):
+        """Calculate tax for a specific employee and tax year."""
+        pass
+    
+    @abstractmethod
+    def get_tax_by_id(self, tax_id: int):
+        """Get tax details by tax ID."""
+        pass
+    
+    @abstractmethod
+    def get_taxes_for_employee(self, employee_id: int):
+        """Get all taxes for a specific employee."""
+        pass
+    
+    @abstractmethod
+    def get_taxes_for_year(self, tax_year: int):
+        """Get all taxes for a specific tax year."""
+        pass
+```
+
+This interface defines the methods required for tax calculation and retrieval. Implementations of this interface should provide concrete implementations for these methods. Let me know if you need further assistance!
+
+
+
+from util.DBConnUtil import DBConnUtil
+from exception import DatabaseConnectionException, TaxCalculationException
+
+class TaxService(ITaxService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()  # Assuming DBConnUtil provides a method to get the database connection
+
+    def calculate_tax(self, employee_id: int, tax_year: int):
+        try:
+            # Retrieve employee details from the database
+            employee = self.get_employee_by_id(employee_id)
+            if not employee:
+                raise TaxCalculationException("Employee not found.")
+
+            # Simulate tax calculation based on employee's taxable income
+            taxable_income = self.calculate_taxable_income(employee_id, tax_year)
+            tax_amount = self.calculate_tax_amount(taxable_income)
+
+            # Insert tax details into the database
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO Tax (EmployeeID, TaxYear, TaxableIncome, TaxAmount) VALUES (%s, %s, %s, %s)"
+            cursor.execute(query, (employee_id, tax_year, taxable_income, tax_amount))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise TaxCalculationException("Error calculating tax.") from e
+
+    def get_tax_by_id(self, tax_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Tax WHERE TaxID = %s"
+            cursor.execute(query, (tax_id,))
+            tax_data = cursor.fetchone()
+            cursor.close()
+            return tax_data  # Assuming this method returns the tax data
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching tax data from database.") from e
+
+    def get_taxes_for_employee(self, employee_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Tax WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            taxes_data = cursor.fetchall()
+            cursor.close()
+            return taxes_data  # Assuming this method returns the taxes data for the given employee
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching tax data from database.") from e
+
+    def get_taxes_for_year(self, tax_year: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Tax WHERE TaxYear = %s"
+            cursor.execute(query, (tax_year,))
+            taxes_data = cursor.fetchall()
+            cursor.close()
+            return taxes_data  # Assuming this method returns the taxes data for the given year
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching tax data from database.") from e
+
+    def calculate_taxable_income(self, employee_id: int, tax_year: int):
+        # Simulate calculation of taxable income for the given employee and tax year
+        # Example: Fetching total income from FinancialRecord table for the specified year
+        return 50000  # Placeholder value for demonstration
+
+    def calculate_tax_amount(self, taxable_income: float):
+        # Simulate calculation of tax amount based on taxable income
+        # Example: Simple tax calculation based on tax brackets
+        if taxable_income <= 10000:
+            return taxable_income * 0.1
+        elif 10000 < taxable_income <= 50000:
+            return 10000 * 0.1 + (taxable_income - 10000) * 0.2
+        else:
+            return 10000 * 0.1 + 40000 * 0.2 + (taxable_income - 50000) * 0.3
+
+
+
+
+
+ def calculate_taxable_income(self, employee_id: int, tax_year: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT SUM(Amount) FROM FinancialRecord WHERE EmployeeID = %s AND YEAR(RecordDate) = %s AND RecordType = 'income'"
+            cursor.execute(query, (employee_id, tax_year))
+            total_income = cursor.fetchone()[0] or 0
+            cursor.close()
+            return total_income
+        except Exception as e:
+            raise DatabaseConnectionException("Error calculating taxable income.") from e
+
+
+
+Sure, here's the interface for the financial record service:
+
+```python
+from abc import ABC, abstractmethod
+
+class IFinancialRecordService(ABC):
+    @abstractmethod
+    def add_financial_record(self, employee_id: int, description: str, amount: float, record_type: str):
+        """Add a new financial record for the specified employee."""
+        pass
+    
+    @abstractmethod
+    def get_financial_record_by_id(self, record_id: int):
+        """Get a financial record by its ID."""
+        pass
+    
+    @abstractmethod
+    def get_financial_records_for_employee(self, employee_id: int):
+        """Get all financial records for a specific employee."""
+        pass
+    
+    @abstractmethod
+    def get_financial_records_for_date(self, record_date: str):
+        """Get all financial records for a specific date."""
+        pass
+```
+
+This interface defines the methods required for managing financial records. Implementations of this interface should provide concrete implementations for these methods. Let me know if you need further assistance!
+
+
+Here's an example implementation of the `FinancialRecordService` class:
+
+```python
+from util.DBConnUtil import DBConnUtil
+from exception import DatabaseConnectionException, FinancialRecordException
+
+class FinancialRecordService(IFinancialRecordService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()  # Assuming DBConnUtil provides a method to get the database connection
+
+    def add_financial_record(self, employee_id: int, description: str, amount: float, record_type: str):
+        try:
+            # Insert financial record into the database
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO FinancialRecord (EmployeeID, RecordDate, Description, Amount, RecordType) VALUES (%s, NOW(), %s, %s, %s)"
+            cursor.execute(query, (employee_id, description, amount, record_type))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise FinancialRecordException("Error adding financial record.") from e
+
+    def get_financial_record_by_id(self, record_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM FinancialRecord WHERE RecordID = %s"
+            cursor.execute(query, (record_id,))
+            financial_record = cursor.fetchone()
+            cursor.close()
+            return financial_record
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching financial record from database.") from e
+
+    def get_financial_records_for_employee(self, employee_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM FinancialRecord WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            financial_records = cursor.fetchall()
+            cursor.close()
+            return financial_records
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching financial records from database.") from e
+
+    def get_financial_records_for_date(self, record_date: str):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM FinancialRecord WHERE DATE(RecordDate) = %s"
+            cursor.execute(query, (record_date,))
+            financial_records = cursor.fetchall()
+            cursor.close()
+            return financial_records
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching financial records from database.") from e
+```
+
+In this implementation:
+- The `FinancialRecordService` class implements the `IFinancialRecordService` interface, providing concrete implementations for all its methods.
+- Financial records are inserted into the database using SQL queries.
+- Methods are provided to fetch financial records by ID, for a specific employee, or for a specific date.
+- Error handling is included for database connections and financial record management.
+
+Feel free to adjust the implementation according to your specific business logic and database schema. Let me know if you need further assistance!
+
+
+
+
+
+class EmployeeNotFoundException(Exception):
+    def __init__(self, message="Employee not found."):
+        self.message = message
+        super().__init__(self.message)
+
+class PayrollGenerationException(Exception):
+    def __init__(self, message="Error generating payroll."):
+        self.message = message
+        super().__init__(self.message)
+
+class TaxCalculationException(Exception):
+    def __init__(self, message="Error calculating tax."):
+        self.message = message
+        super().__init__(self.message)
+
+class FinancialRecordException(Exception):
+    def __init__(self, message="Error managing financial records."):
+        self.message = message
+        super().__init__(self.message)
+
+class InvalidInputException(Exception):
+    def __init__(self, message="Invalid input provided."):
+        self.message = message
+        super().__init__(self.message)
+
+class DatabaseConnectionException(Exception):
+    def __init__(self, message="Error connecting to the database."):
+        self.message = message
+        super().__init__(self.message)
+
+
+
+
+
+
+
+
+
+====================================================
+from util.DBConnUtil import DBConnUtil
+from exception import DatabaseConnectionException, EmployeeNotFoundException
+
+class EmployeeService(IEmployeeService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()  # Assuming DBConnUtil provides a method to get the database connection
+
+    def get_employee_by_id(self, employee_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Employee WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            employee = cursor.fetchone()
+            cursor.close()
+            if not employee:
+                raise EmployeeNotFoundException("Employee not found.")
+            return employee
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching employee data from database.") from e
+
+    def get_all_employees(self):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Employee"
+            cursor.execute(query)
+            employees = cursor.fetchall()
+            cursor.close()
+            return employees
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching employee data from database.") from e
+
+    def add_employee(self, employee_data: dict):
+        try:
+            # Insert employee data into the database
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO Employee (FirstName, LastName, DateOfBirth, Gender, Email, PhoneNumber, Address, Position, JoiningDate, TerminationDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(query, (
+                employee_data.get('FirstName'),
+                employee_data.get('LastName'),
+                employee_data.get('DateOfBirth'),
+                employee_data.get('Gender'),
+                employee_data.get('Email'),
+                employee_data.get('PhoneNumber'),
+                employee_data.get('Address'),
+                employee_data.get('Position'),
+                employee_data.get('JoiningDate'),
+                employee_data.get('TerminationDate')
+            ))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error adding employee.") from e
+
+    def update_employee(self, employee_data: dict):
+        try:
+            # Update employee data in the database
+            cursor = self.db_conn.cursor()
+            query = "UPDATE Employee SET FirstName = %s, LastName = %s, DateOfBirth = %s, Gender = %s, Email = %s, PhoneNumber = %s, Address = %s, Position = %s, JoiningDate = %s, TerminationDate = %s WHERE EmployeeID = %s"
+            cursor.execute(query, (
+                employee_data.get('FirstName'),
+                employee_data.get('LastName'),
+                employee_data.get('DateOfBirth'),
+                employee_data.get('Gender'),
+                employee_data.get('Email'),
+                employee_data.get('PhoneNumber'),
+                employee_data.get('Address'),
+                employee_data.get('Position'),
+                employee_data.get('JoiningDate'),
+                employee_data.get('TerminationDate'),
+                employee_data.get('EmployeeID')
+            ))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error updating employee.") from e
+
+    def remove_employee(self, employee_id: int):
+        try:
+            # Delete employee from the database
+            cursor = self.db_conn.cursor()
+            query = "DELETE FROM Employee WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error removing employee.") from e
+========================================================
+from util.DBConnUtil import DBConnUtil
+from exception import DatabaseConnectionException, PayrollGenerationException
+
+class PayrollService(IPayrollService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()  # Assuming DBConnUtil provides a method to get the database connection
+
+    def generate_payroll(self, employee_id: int, start_date: str, end_date: str):
+        try:
+            # Calculate basic salary, overtime pay, and deductions
+            basic_salary = self.calculate_basic_salary(employee_id, start_date, end_date)
+            overtime_pay = self.calculate_overtime_hours(employee_id, start_date, end_date) * hourly_rate  # Assuming hourly_rate is defined somewhere
+            deductions = self.calculate_deductions(employee_id, start_date, end_date)
+            
+            # Calculate net salary
+            net_salary = basic_salary + overtime_pay - deductions
+            
+            # Insert payroll details into the database
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO Payroll (EmployeeID, PayPeriodStartDate, PayPeriodEndDate, BasicSalary, OvertimePay, Deductions, NetSalary) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(query, (employee_id, start_date, end_date, basic_salary, overtime_pay, deductions, net_salary))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise PayrollGenerationException("Error generating payroll.") from e
+
+    def get_payroll_by_id(self, payroll_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Payroll WHERE PayrollID = %s"
+            cursor.execute(query, (payroll_id,))
+            payroll = cursor.fetchone()
+            cursor.close()
+            return payroll
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching payroll data from database.") from e
+
+    def get_payrolls_for_employee(self, employee_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Payroll WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            payrolls = cursor.fetchall()
+            cursor.close()
+            return payrolls
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching payroll data from database.") from e
+
+    def get_payrolls_for_period(self, start_date: str, end_date: str):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Payroll WHERE PayPeriodStartDate = %s AND PayPeriodEndDate = %s"
+            cursor.execute(query, (start_date, end_date))
+            payrolls = cursor.fetchall()
+            cursor.close()
+            return payrolls
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching payroll data from database.") from e
+
+    # Implement methods for calculating basic salary, overtime pay, and deductions
+    def calculate_basic_salary(self, employee_id: int, start_date: str, end_date: str):
+        # Implement logic to calculate basic salary
+        pass
+
+    def calculate_overtime_hours(self, employee_id: int, start_date: str, end_date: str):
+        # Implement logic to calculate overtime hours
+        pass
+
+    def calculate_deductions(self, employee_id: int, start_date: str, end_date: str):
+        # Implement logic to calculate deductions
+        pass
+===================================================
+from util.DBConnUtil import DBConnUtil
+from exception import DatabaseConnectionException, TaxCalculationException
+
+class TaxService(ITaxService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()  # Assuming DBConnUtil provides a method to get the database connection
+
+    def calculate_tax(self, employee_id: int, tax_year: int):
+        try:
+            # Calculate taxable income for the employee
+            taxable_income = self.calculate_taxable_income(employee_id, tax_year)
+            
+            # Perform actual tax calculation based on taxable income and tax rules
+            tax_amount = self.calculate_tax_amount(taxable_income)
+            
+            # Insert tax details into the database
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO Tax (EmployeeID, TaxYear, TaxableIncome, TaxAmount) VALUES (%s, %s, %s, %s)"
+            cursor.execute(query, (employee_id, tax_year, taxable_income, tax_amount))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise TaxCalculationException("Error calculating tax.") from e
+
+    def get_tax_by_id(self, tax_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Tax WHERE TaxID = %s"
+            cursor.execute(query, (tax_id,))
+            tax = cursor.fetchone()
+            cursor.close()
+            return tax
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching tax data from database.") from e
+
+    def get_taxes_for_employee(self, employee_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Tax WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            taxes = cursor.fetchall()
+            cursor.close()
+            return taxes
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching tax data from database.") from e
+
+    def get_taxes_for_year(self, tax_year: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Tax WHERE TaxYear = %s"
+            cursor.execute(query, (tax_year,))
+            taxes = cursor.fetchall()
+            cursor.close()
+            return taxes
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching tax data from database.") from e
+
+    # Implement methods for calculating taxable income and tax amount
+    def calculate_taxable_income(self, employee_id: int, tax_year: int):
+        # Implement logic to calculate taxable income
+        pass
+
+    def calculate_tax_amount(self, taxable_income: float):
+        # Implement logic to calculate tax amount based on taxable income and tax rules
+        pass
+==============================================
+from util.DBConnUtil import DBConnUtil
+from exception import DatabaseConnectionException, FinancialRecordException
+
+class FinancialRecordService(IFinancialRecordService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()  # Assuming DBConnUtil provides a method to get the database connection
+
+    def add_financial_record(self, employee_id: int, description: str, amount: float, record_type: str):
+        try:
+            # Insert financial record into the database
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO FinancialRecord (EmployeeID, RecordDate, Description, Amount, RecordType) VALUES (%s, NOW(), %s, %s, %s)"
+            cursor.execute(query, (employee_id, description, amount, record_type))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise FinancialRecordException("Error adding financial record.") from e
+
+    def get_financial_record_by_id(self, record_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM FinancialRecord WHERE RecordID = %s"
+            cursor.execute(query, (record_id,))
+            financial_record = cursor.fetchone()
+            cursor.close()
+            return financial_record
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching financial record from database.") from e
+
+    def get_financial_records_for_employee(self, employee_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM FinancialRecord WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            financial_records = cursor.fetchall()
+            cursor.close()
+            return financial_records
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching financial records from database.") from e
+
+    def get_financial_records_for_date(self, record_date: str):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM FinancialRecord WHERE DATE(RecordDate) = %s"
+            cursor.execute(query, (record_date,))
+            financial_records = cursor.fetchall()
+            cursor.close()
+            return financial_records
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching financial records from database.") from e
+==========================================================
+from service.EmployeeService import EmployeeService
+from service.PayrollService import PayrollService
+from service.TaxService import TaxService
+from service.FinancialRecordService import FinancialRecordService
+from exception.InvalidInputException import InvalidInputException
+from exception.DatabaseConnectionException import DatabaseConnectionException
+
+class MainModule:
+    def __init__(self):
+        self.employee_service = EmployeeService()
+        self.payroll_service = PayrollService()
+        self.tax_service = TaxService()
+        self.financial_record_service = FinancialRecordService()
+
+    def display_menu(self):
+        print("\n=== Payroll Management System ===")
+        print("1. Employee Menu")
+        print("2. Payroll Menu")
+        print("3. Tax Menu")
+        print("4. Financial Record Menu")
+        print("5. Exit")
+
+    def employee_menu(self):
+        while True:
+            print("\n=== Employee Menu ===")
+            print("1. Add Employee")
+            print("2. Get Employee by ID")
+            print("3. Get All Employees")
+            print("4. Update Employee")
+            print("5. Remove Employee")
+            print("6. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.add_employee()
+            elif choice == "2":
+                self.get_employee_by_id()
+            elif choice == "3":
+                self.get_all_employees()
+            elif choice == "4":
+                self.update_employee()
+            elif choice == "5":
+                self.remove_employee()
+            elif choice == "6":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def payroll_menu(self):
+        while True:
+            print("\n=== Payroll Menu ===")
+            print("1. Generate Payroll")
+            print("2. Get Payroll by ID")
+            print("3. Get Payrolls for Employee")
+            print("4. Get Payrolls for Period")
+            print("5. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.generate_payroll()
+            elif choice == "2":
+                self.get_payroll_by_id()
+            elif choice == "3":
+                self.get_payrolls_for_employee()
+            elif choice == "4":
+                self.get_payrolls_for_period()
+            elif choice == "5":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def tax_menu(self):
+        while True:
+            print("\n=== Tax Menu ===")
+            print("1. Calculate Tax")
+            print("2. Get Tax by ID")
+            print("3. Get Taxes for Employee")
+            print("4. Get Taxes for Year")
+            print("5. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.calculate_tax()
+            elif choice == "2":
+                self.get_tax_by_id()
+            elif choice == "3":
+                self.get_taxes_for_employee()
+            elif choice == "4":
+                self.get_taxes_for_year()
+            elif choice == "5":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def financial_record_menu(self):
+        while True:
+            print("\n=== Financial Record Menu ===")
+            print("1. Add Financial Record")
+            print("2. Get Financial Record by ID")
+            print("3. Get Financial Records for Employee")
+            print("4. Get Financial Records for Date")
+            print("5. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.add_financial_record()
+            elif choice == "2":
+                self.get_financial_record_by_id()
+            elif choice == "3":
+                self.get_financial_records_for_employee()
+            elif choice == "4":
+                self.get_financial_records_for_date()
+            elif choice == "5":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def add_employee(self):
+        try:
+            # Gather employee details from user input
+            first_name = input("Enter first name: ")
+            last_name = input("Enter last name: ")
+            date_of_birth = input("Enter date of birth (YYYY-MM-DD): ")
+            gender = input("Enter gender: ")
+            email = input("Enter email address: ")
+            phone_number = input("Enter phone number: ")
+            address = input("Enter address: ")
+            position = input("Enter position: ")
+            joining_date = input("Enter joining date (YYYY-MM-DD): ")
+            termination_date = input("Enter termination date (if any, otherwise press Enter): ")
+
+            # Add employee using the service
+            self.employee_service.add_employee(first_name, last_name, date_of_birth, gender, email, phone_number,
+                                                address, position, joining_date, termination_date)
+            print("Employee added successfully!")
+        except InvalidInputException as e:
+            print(e)
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def generate_payroll(self):
+        try:
+            # Get employee ID and pay period dates from user input
+            employee_id = int(input("Enter employee ID: "))
+            start_date = input("Enter start date of pay period (YYYY-MM-DD): ")
+            end_date = input("Enter end date of pay period (YYYY-MM-DD): ")
+
+            # Generate payroll using the service
+            self.payroll_service.generate_payroll(employee_id, start_date, end_date)
+            print("Payroll generated successfully!")
+        except ValueError:
+            print("Invalid input for employee ID!")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def calculate_tax(self):
+        try:
+            # Get
+
+ employee ID and tax year from user input
+            employee_id = int(input("Enter employee ID: "))
+            tax_year = int(input("Enter tax year: "))
+
+            # Calculate tax using the service
+            self.tax_service.calculate_tax(employee_id, tax_year)
+            print("Tax calculated successfully!")
+        except ValueError:
+            print("Invalid input for employee ID or tax year!")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def add_financial_record(self):
+        try:
+            # Get financial record details from user input
+            employee_id = int(input("Enter employee ID: "))
+            description = input("Enter description: ")
+            amount = float(input("Enter amount: "))
+            record_type = input("Enter record type: ")
+
+            # Add financial record using the service
+            self.financial_record_service.add_financial_record(employee_id, description, amount, record_type)
+            print("Financial record added successfully!")
+        except ValueError:
+            print("Invalid input for employee ID or amount!")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def run(self):
+        while True:
+            self.display_menu()
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.employee_menu()
+            elif choice == "2":
+                self.payroll_menu()
+            elif choice == "3":
+                self.tax_menu()
+            elif choice == "4":
+                self.financial_record_menu()
+            elif choice == "5":
+                print("Exiting the application.")
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main_module = MainModule()
+    main_module.run()
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sure, here are the utility classes `PropertyUtil` and `DBConnection`:
+
+```python
+import json
+
+class PropertyUtil:
+    @staticmethod
+    def get_property_string(file_name):
+        try:
+            with open(file_name) as f:
+                json_data = json.load(f)
+                return json_data
+        except FileNotFoundError:
+            print("Property file not found.")
+            return None
+        except json.JSONDecodeError:
+            print("Error decoding JSON.")
+            return None
+
+class DBConnection:
+    con = None
+
+    @staticmethod
+    def get_connection():
+        if DBConnection.con is None:
+            try:
+                con_path = "../configs/database_config.json"
+                con_string = PropertyUtil.get_property_string(con_path)
+                if con_string:
+                    DBConnection.con = con_string.get("connection_string")
+                    return DBConnection.con
+                else:
+                    raise DatabaseConnectionException("Error retrieving connection string from property file.")
+            except DatabaseConnectionException as e:
+                print(e)
+                return None
+        else:
+            return DBConnection.con
+```
+
+Note: I've assumed that the `database_config.json` file contains the connection string for the database. Adjust the `PropertyUtil` class according to your actual JSON file structure. Additionally, the `DatabaseConnectionException` class is assumed to be defined in another file. Make sure to import it if necessary.
+
+
+Sure, here are the utility classes `PropertyUtil` and `DBConnection`:
+
+```python
+import json
+
+class PropertyUtil:
+    @staticmethod
+    def get_property_string(file_name):
+        try:
+            with open(file_name) as f:
+                json_data = json.load(f)
+                return json_data
+        except FileNotFoundError:
+            print("Property file not found.")
+            return None
+        except json.JSONDecodeError:
+            print("Error decoding JSON.")
+            return None
+
+class DBConnection:
+    con = None
+
+    @staticmethod
+    def get_connection():
+        if DBConnection.con is None:
+            try:
+                con_path = "../configs/database_config.json"
+                con_string = PropertyUtil.get_property_string(con_path)
+                if con_string:
+                    DBConnection.con = con_string.get("connection_string")
+                    return DBConnection.con
+                else:
+                    raise DatabaseConnectionException("Error retrieving connection string from property file.")
+            except DatabaseConnectionException as e:
+                print(e)
+                return None
+        else:
+            return DBConnection.con
+```
+
+Note: I've assumed that the `database_config.json` file contains the connection string for the database. Adjust the `PropertyUtil` class according to your actual JSON file structure. Additionally, the `DatabaseConnectionException` class is assumed to be defined in another file. Make sure to import it if necessary.
