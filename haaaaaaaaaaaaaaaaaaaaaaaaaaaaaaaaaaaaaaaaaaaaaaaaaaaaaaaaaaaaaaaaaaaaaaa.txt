@@ -1,16 +1,87 @@
-class Employee:
-    def __init__(self, employee_id, first_name, last_name, date_of_birth, gender, email, phone_number, address, position, joining_date, termination_date):
-        self.__employee_id = employee_id
-        self.__first_name = first_name
-        self.__last_name = last_name
-        self.__date_of_birth = date_of_birth
-        self.__gender = gender
-        self.__email = email
-        self.__phone_number = phone_number
-        self.__address = address
-        self.__position = position
-        self.__joining_date = joining_date
-        self.__termination_date = termination_date
+from service.IPayrollService import IPayrollService
+from exception import DatabaseConnectionException, PayrollGenerationException
+from entity.payroll import Payroll
+from util.DBConnUtil import DBConnUtil
 
-    def __str__(self):
-        return f"Employee ID: {self.__employee_id}, Name: {self.__first_name} {self.__last_name}, Email: {self.__email}, Position: {self.__position}"
+class PayrollService(IPayrollService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()
+
+    def generate_payroll(self, employee_id: int, start_date: str, end_date: str):
+        try:
+            # Fetch employee details from the database based on employee_id
+            employee = self.get_employee_details(employee_id)
+
+            # Calculate the salary based on employee's position, hours worked, etc.
+            salary = self.calculate_salary(employee)
+
+            # Deduct taxes, insurance, etc. from the salary to get net pay
+            net_pay = self.calculate_net_pay(salary)
+
+            # Create a Payroll object with the calculated values and insert it into the database
+            payroll = Payroll(employee_id, start_date, end_date, salary, net_pay)
+            self.insert_payroll(payroll)
+
+            return payroll  # Return the generated payroll object
+        except Exception as e:
+            raise PayrollGenerationException("Error generating payroll.") from e
+
+    def get_employee_details(self, employee_id: int):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Employee WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            employee_data = cursor.fetchone()
+            cursor.close()
+            if employee_data:
+                # Return employee details as a dictionary or an object
+                return employee_data
+            else:
+                raise DatabaseConnectionException("Employee not found.")
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching employee details from database.") from e
+
+    def calculate_salary(self, employee):
+        # Placeholder logic to calculate salary based on employee's position, hours worked, etc.
+        # Sample logic: Calculate salary based on hourly rate and hours worked
+        hourly_rate = 25  # Example hourly rate
+        hours_worked = 40  # Example hours worked
+        return hourly_rate * hours_worked
+
+    def calculate_net_pay(self, gross_salary):
+        # Placeholder logic to deduct taxes, insurance, etc. from the gross salary to get net pay
+        # Sample logic: Deduct 20% for taxes
+        tax_rate = 0.2
+        return gross_salary * (1 - tax_rate)
+
+    def insert_payroll(self, payroll):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO Payroll (EmployeeID, StartDate, EndDate, Salary, NetPay) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(query, (payroll.employee_id, payroll.start_date, payroll.end_date, payroll.salary, payroll.net_pay))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error inserting payroll into database.") from e
+
+
+from abc import ABC, abstractmethod
+from typing import List
+from entity.payroll import Payroll
+
+class IPayrollService(ABC):
+    @abstractmethod
+    def generate_payroll(self, employee_id: int, start_date: str, end_date: str):
+        pass
+    
+    @abstractmethod
+    def get_payroll_by_id(self, payroll_id: int) -> Payroll:
+        pass
+    
+    @abstractmethod
+    def get_payrolls_for_employee(self, employee_id: int) -> List[Payroll]:
+        pass
+    
+    @abstractmethod
+    def get_payrolls_for_period(self, start_date: str, end_date: str) -> List[Payroll]:
+        pass
