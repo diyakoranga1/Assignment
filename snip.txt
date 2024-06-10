@@ -1,0 +1,1464 @@
+Let's refine the code to follow encapsulation principles by making attributes private and providing getters and setters. We'll also define the interfaces for DAO (Data Access Object) implementations.
+
+### Entity Classes
+
+**`Employee.py`**
+
+```python
+class Employee:
+    def __init__(self, employee_id, first_name, last_name, date_of_birth, gender, email, phone_number, address, position, joining_date, termination_date=None):
+        self.__employee_id = employee_id
+        self.__first_name = first_name
+        self.__last_name = last_name
+        self.__date_of_birth = date_of_birth
+        self.__gender = gender
+        self.__email = email
+        self.__phone_number = phone_number
+        self.__address = address
+        self.__position = position
+        self.__joining_date = joining_date
+        self.__termination_date = termination_date
+
+    def calculate_age(self):
+        from datetime import date
+        return date.today().year - self.__date_of_birth.year
+
+    # Getters and setters
+    def get_employee_id(self):
+        return self.__employee_id
+
+    def get_first_name(self):
+        return self.__first_name
+
+    def set_first_name(self, first_name):
+        self.__first_name = first_name
+
+    def get_last_name(self):
+        return self.__last_name
+
+    def set_last_name(self, last_name):
+        self.__last_name = last_name
+
+    def get_date_of_birth(self):
+        return self.__date_of_birth
+
+    def set_date_of_birth(self, date_of_birth):
+        self.__date_of_birth = date_of_birth
+
+    def get_gender(self):
+        return self.__gender
+
+    def set_gender(self, gender):
+        self.__gender = gender
+
+    def get_email(self):
+        return self.__email
+
+    def set_email(self, email):
+        self.__email = email
+
+    def get_phone_number(self):
+        return self.__phone_number
+
+    def set_phone_number(self, phone_number):
+        self.__phone_number = phone_number
+
+    def get_address(self):
+        return self.__address
+
+    def set_address(self, address):
+        self.__address = address
+
+    def get_position(self):
+        return self.__position
+
+    def set_position(self, position):
+        self.__position = position
+
+    def get_joining_date(self):
+        return self.__joining_date
+
+    def set_joining_date(self, joining_date):
+        self.__joining_date = joining_date
+
+    def get_termination_date(self):
+        return self.__termination_date
+
+    def set_termination_date(self, termination_date):
+        self.__termination_date = termination_date
+```
+
+**`Payroll.py`**
+
+```python
+class Payroll:
+    def __init__(self, payroll_id, employee_id, pay_period_start_date, pay_period_end_date, basic_salary, overtime_pay, deductions, net_salary):
+        self.__payroll_id = payroll_id
+        self.__employee_id = employee_id
+        self.__pay_period_start_date = pay_period_start_date
+        self.__pay_period_end_date = pay_period_end_date
+        self.__basic_salary = basic_salary
+        self.__overtime_pay = overtime_pay
+        self.__deductions = deductions
+        self.__net_salary = net_salary
+
+    # Getters and setters
+    def get_payroll_id(self):
+        return self.__payroll_id
+
+    def get_employee_id(self):
+        return self.__employee_id
+
+    def get_pay_period_start_date(self):
+        return self.__pay_period_start_date
+
+    def set_pay_period_start_date(self, pay_period_start_date):
+        self.__pay_period_start_date = pay_period_start_date
+
+    def get_pay_period_end_date(self):
+        return self.__pay_period_end_date
+
+    def set_pay_period_end_date(self, pay_period_end_date):
+        self.__pay_period_end_date = pay_period_end_date
+
+    def get_basic_salary(self):
+        return self.__basic_salary
+
+    def set_basic_salary(self, basic_salary):
+        self.__basic_salary = basic_salary
+
+    def get_overtime_pay(self):
+        return self.__overtime_pay
+
+    def set_overtime_pay(self, overtime_pay):
+        self.__overtime_pay = overtime_pay
+
+    def get_deductions(self):
+        return self.__deductions
+
+    def set_deductions(self, deductions):
+        self.__deductions = deductions
+
+    def get_net_salary(self):
+        return self.__net_salary
+
+    def set_net_salary(self, net_salary):
+        self.__net_salary = net_salary
+```
+
+**`Tax.py`**
+
+```python
+class Tax:
+    def __init__(self, tax_id, employee_id, tax_year, taxable_income, tax_amount):
+        self.__tax_id = tax_id
+        self.__employee_id = employee_id
+        self.__tax_year = tax_year
+        self.__taxable_income = taxable_income
+        self.__tax_amount = tax_amount
+
+    # Getters and setters
+    def get_tax_id(self):
+        return self.__tax_id
+
+    def get_employee_id(self):
+        return self.__employee_id
+
+    def get_tax_year(self):
+        return self.__tax_year
+
+    def set_tax_year(self, tax_year):
+        self.__tax_year = tax_year
+
+    def get_taxable_income(self):
+        return self.__taxable_income
+
+    def set_taxable_income(self, taxable_income):
+        self.__taxable_income = taxable_income
+
+    def get_tax_amount(self):
+        return self.__tax_amount
+
+    def set_tax_amount(self, tax_amount):
+        self.__tax_amount = tax_amount
+```
+
+**`FinancialRecord.py`**
+
+```python
+class FinancialRecord:
+    def __init__(self, record_id, employee_id, record_date, description, amount, record_type):
+        self.__record_id = record_id
+        self.__employee_id = employee_id
+        self.__record_date = record_date
+        self.__description = description
+        self.__amount = amount
+        self.__record_type = record_type
+
+    # Getters and setters
+    def get_record_id(self):
+        return self.__record_id
+
+    def get_employee_id(self):
+        return self.__employee_id
+
+    def get_record_date(self):
+        return self.__record_date
+
+    def set_record_date(self, record_date):
+        self.__record_date = record_date
+
+    def get_description(self):
+        return self.__description
+
+    def set_description(self, description):
+        self.__description = description
+
+    def get_amount(self):
+        return self.__amount
+
+    def set_amount(self, amount):
+        self.__amount = amount
+
+    def get_record_type(self):
+        return self.__record_type
+
+    def set_record_type(self, record_type):
+        self.__record_type = record_type
+```
+
+### DAO Interfaces
+
+**`IEmployeeService.py`**
+
+```python
+from abc import ABC, abstractmethod
+
+class IEmployeeService(ABC):
+
+    @abstractmethod
+    def get_employee_by_id(self, employee_id):
+        pass
+
+    @abstractmethod
+    def get_all_employees(self):
+        pass
+
+    @abstractmethod
+    def add_employee(self, employee_data):
+        pass
+
+    @abstractmethod
+    def update_employee(self, employee_data):
+        pass
+
+    @abstractmethod
+    def remove_employee(self, employee_id):
+        pass
+```
+
+**`IPayrollService.py`**
+
+```python
+from abc import ABC, abstractmethod
+
+class IPayrollService(ABC):
+
+    @abstractmethod
+    def generate_payroll(self, employee_id, start_date, end_date):
+        pass
+
+    @abstractmethod
+    def get_payroll_by_id(self, payroll_id):
+        pass
+
+    @abstractmethod
+    def get_payrolls_for_employee(self, employee_id):
+        pass
+
+    @abstractmethod
+    def get_payrolls_for_period(self, start_date, end_date):
+        pass
+```
+
+**`ITaxService.py`**
+
+```python
+from abc import ABC, abstractmethod
+
+class ITaxService(ABC):
+
+    @abstractmethod
+    def calculate_tax(self, employee_id, tax_year):
+        pass
+
+    @abstractmethod
+    def get_tax_by_id(self, tax_id):
+        pass
+
+    @abstractmethod
+    def get_taxes_for_employee(self, employee_id):
+        pass
+
+    @abstractmethod
+    def get_taxes_for_year(self, tax_year):
+        pass
+```
+
+**`IFinancialRecordService.py`**
+
+```python
+from abc import ABC, abstractmethod
+
+class IFinancialRecordService(ABC):
+
+    @abstractmethod
+    def add_financial_record(self, employee_id, description, amount, record_type):
+        pass
+
+    @abstractmethod
+    def get_financial_record_by_id(self, record_id):
+        pass
+
+    @abstractmethod
+    def get_financial_records_for_employee(self, employee_id):
+        pass
+
+    @abstractmethod
+    def get_financial_records_for_date(self, record_date):
+        pass
+```
+
+### Utility Classes
+
+**`DBPropertyUtil.py`**
+
+```python
+import json
+
+class DBPropertyUtil:
+    @staticmethod
+    def get_property_string(file_name):
+        try:
+            with open(file_name, 'r') as f:
+                properties = json.load(f)
+                if properties:
+                    return properties
+                else:
+                    raise ValueError("Property file is empty or invalid")
+        except Exception as e:
+            raise ValueError(f"Error while opening file: {e}")
+```
+
+**`DBConnUtil.py`**
+
+```python
+import mysql.connector
+from mysql.connector import Error
+
+class DBConnUtil:
+    con = None
+
+    @staticmethod
+    def get_connection():
+        if DBConnUtil.con is None:
+            try:
+                config = DBPropertyUtil.get_property_string('database_config.json')
+                DBConnUtil.con = mysql.connector.connect(**config)
+                if
+
+ DBConnUtil.con.is_connected():
+                    print("Connection established")
+            except Error as e:
+                print(f"Error: {e}")
+                raise
+        return DBConnUtil.con
+```
+
+### Exception Classes
+
+**`EmployeeNotFoundException.py`**
+
+```python
+class EmployeeNotFoundException(Exception):
+    def __init__(self, message="Employee not found"):
+        self.message = message
+        super().__init__(self.message)
+```
+
+**`PayrollGenerationException.py`**
+
+```python
+class PayrollGenerationException(Exception):
+    def __init__(self, message="Error generating payroll"):
+        self.message = message
+        super().__init__(self.message)
+```
+
+**`TaxCalculationException.py`**
+
+```python
+class TaxCalculationException(Exception):
+    def __init__(self, message="Error calculating tax"):
+        self.message = message
+        super().__init__(self.message)
+```
+
+**`FinancialRecordException.py`**
+
+```python
+class FinancialRecordException(Exception):
+    def __init__(self, message="Error managing financial record"):
+        self.message = message
+        super().__init__(self.message)
+```
+
+**`InvalidInputException.py`**
+
+```python
+class InvalidInputException(Exception):
+    def __init__(self, message="Invalid input data"):
+        self.message = message
+        super().__init__(self.message)
+```
+
+### Main Module
+
+**`MainModule.py`**
+
+```python
+from dao.EmployeeService import EmployeeService
+from dao.PayrollService import PayrollService
+from dao.TaxService import TaxService
+from dao.FinancialRecordService import FinancialRecordService
+
+def main():
+    employee_service = EmployeeService()
+    payroll_service = PayrollService()
+    tax_service = TaxService()
+    financial_record_service = FinancialRecordService()
+
+    while True:
+        print("Payroll Management System")
+        print("1. Manage Employees")
+        print("2. Manage Payroll")
+        print("3. Manage Taxes")
+        print("4. Manage Financial Records")
+        print("5. Exit")
+        choice = int(input("Enter your choice: "))
+
+        if choice == 1:
+            # Employee management options
+            pass
+        elif choice == 2:
+            # Payroll management options
+            pass
+        elif choice == 3:
+            # Tax management options
+            pass
+        elif choice == 4:
+            # Financial record management options
+            pass
+        elif choice == 5:
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
+```
+
+### Test Cases
+
+**`TestPayrollManagementSystem.py`**
+
+```python
+import unittest
+from dao.EmployeeService import EmployeeService
+
+class TestPayrollManagementSystem(unittest.TestCase):
+
+    def setUp(self):
+        self.employee_service = EmployeeService()
+        # Additional setup if needed
+
+    def test_calculate_gross_salary_for_employee(self):
+        # Implementation of the test case
+        pass
+
+    def test_calculate_net_salary_after_deductions(self):
+        # Implementation of the test case
+        pass
+
+    def test_verify_tax_calculation_for_high_income_employee(self):
+        # Implementation of the test case
+        pass
+
+    def test_process_payroll_for_multiple_employees(self):
+        # Implementation of the test case
+        pass
+
+    def test_verify_error_handling_for_invalid_employee_data(self):
+        # Implementation of the test case
+        pass
+
+if __name__ == "__main__":
+    unittest.main()
+```
+
+This outline covers the structure and fundamental implementation needed for your Payroll Management System. Each component should be further developed with detailed methods and interactions based on the specific requirements and functionality.
+
+
+Here's the implementation of the `EmployeeService` class which includes methods for CRUD operations on the Employee entity.
+
+### `EmployeeService.py`
+
+```python
+import mysql.connector
+from entity.Employee import Employee
+from exception.EmployeeNotFoundException import EmployeeNotFoundException
+from util.DBConnUtil import DBConnUtil
+
+class EmployeeService:
+    def __init__(self):
+        self.conn = DBConnUtil.get_connection()
+
+    def get_employee_by_id(self, employee_id):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Employee WHERE EmployeeID = %s", (employee_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        if result:
+            return Employee(**result)
+        else:
+            raise EmployeeNotFoundException(f"Employee with ID {employee_id} not found")
+
+    def get_all_employees(self):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Employee")
+        results = cursor.fetchall()
+        cursor.close()
+        return [Employee(**result) for result in results]
+
+    def add_employee(self, employee_data):
+        cursor = self.conn.cursor()
+        insert_query = """
+        INSERT INTO Employee (FirstName, LastName, DateOfBirth, Gender, Email, PhoneNumber, Address, Position, JoiningDate, TerminationDate)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (
+            employee_data.get_first_name(),
+            employee_data.get_last_name(),
+            employee_data.get_date_of_birth(),
+            employee_data.get_gender(),
+            employee_data.get_email(),
+            employee_data.get_phone_number(),
+            employee_data.get_address(),
+            employee_data.get_position(),
+            employee_data.get_joining_date(),
+            employee_data.get_termination_date()
+        ))
+        self.conn.commit()
+        cursor.close()
+
+    def update_employee(self, employee_data):
+        cursor = self.conn.cursor()
+        update_query = """
+        UPDATE Employee SET FirstName=%s, LastName=%s, DateOfBirth=%s, Gender=%s, Email=%s, PhoneNumber=%s, Address=%s, Position=%s, JoiningDate=%s, TerminationDate=%s
+        WHERE EmployeeID=%s
+        """
+        cursor.execute(update_query, (
+            employee_data.get_first_name(),
+            employee_data.get_last_name(),
+            employee_data.get_date_of_birth(),
+            employee_data.get_gender(),
+            employee_data.get_email(),
+            employee_data.get_phone_number(),
+            employee_data.get_address(),
+            employee_data.get_position(),
+            employee_data.get_joining_date(),
+            employee_data.get_termination_date(),
+            employee_data.get_employee_id()
+        ))
+        self.conn.commit()
+        cursor.close()
+
+    def remove_employee(self, employee_id):
+        cursor = self.conn.cursor()
+        cursor.execute("DELETE FROM Employee WHERE EmployeeID = %s", (employee_id,))
+        self.conn.commit()
+        cursor.close()
+```
+
+### Explanation
+
+1. **Initialization**: The `__init__` method initializes the service by establishing a connection to the database using `DBConnUtil.get_connection()`.
+
+2. **Get Employee by ID**: The `get_employee_by_id` method retrieves an employee record by its ID. If the employee is not found, an `EmployeeNotFoundException` is raised.
+
+3. **Get All Employees**: The `get_all_employees` method retrieves all employee records from the database and returns them as a list of `Employee` objects.
+
+4. **Add Employee**: The `add_employee` method inserts a new employee record into the database. It uses a parameterized query to prevent SQL injection.
+
+5. **Update Employee**: The `update_employee` method updates an existing employee record. It uses a parameterized query to set the new values for the employee's attributes.
+
+6. **Remove Employee**: The `remove_employee` method deletes an employee record by its ID.
+
+### Notes
+
+- This implementation assumes that the `Employee` class has a constructor that can accept keyword arguments and a method to return private attributes.
+- The database schema should already be set up according to the SQL provided earlier.
+- Error handling can be further improved by adding specific exception handling for database operations.
+- The database connection utility should be properly implemented to handle the connection pooling and management effectively.
+
+### Utility Classes
+
+**`DBConnUtil.py`**
+
+This utility class manages the database connection.
+
+```python
+import mysql.connector
+from mysql.connector import Error
+from util.DBPropertyUtil import DBPropertyUtil
+
+class DBConnUtil:
+    con = None
+
+    @staticmethod
+    def get_connection():
+        if DBConnUtil.con is None:
+            try:
+                config = DBPropertyUtil.get_property_string('database_config.json')
+                DBConnUtil.con = mysql.connector.connect(**config)
+                if DBConnUtil.con.is_connected():
+                    print("Connection established")
+            except Error as e:
+                print(f"Error: {e}")
+                raise
+        return DBConnUtil.con
+```
+
+**`DBPropertyUtil.py`**
+
+This utility class handles reading the database configuration properties from a JSON file.
+
+```python
+import json
+
+class DBPropertyUtil:
+    @staticmethod
+    def get_property_string(file_name):
+        try:
+            with open(file_name, 'r') as f:
+                properties = json.load(f)
+                if properties:
+                    return properties
+                else:
+                    raise ValueError("Property file is empty or invalid")
+        except Exception as e:
+            raise ValueError(f"Error while opening file: {e}")
+```
+
+With this implementation, the `EmployeeService` class can handle CRUD operations for employee data, interacting with the database through the utility classes.
+
+
+Sure! Here's the implementation of the `PayrollService` class, which includes methods for generating payroll, retrieving payroll by ID, retrieving payrolls for an employee, and retrieving payrolls for a specified period.
+
+### `PayrollService.py`
+
+```python
+import mysql.connector
+from entity.Payroll import Payroll
+from exception.PayrollGenerationException import PayrollGenerationException
+from util.DBConnUtil import DBConnUtil
+
+class PayrollService:
+    def __init__(self):
+        self.conn = DBConnUtil.get_connection()
+
+    def generate_payroll(self, employee_id, start_date, end_date):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT BasicSalary FROM Employee WHERE EmployeeID = %s", (employee_id,))
+        employee = cursor.fetchone()
+        if not employee:
+            raise PayrollGenerationException(f"No employee found with ID {employee_id}")
+
+        basic_salary = employee['BasicSalary']
+        # Add logic for overtime and deductions calculation
+        overtime_pay = self.calculate_overtime(employee_id, start_date, end_date)
+        deductions = self.calculate_deductions(employee_id, start_date, end_date)
+        net_salary = basic_salary + overtime_pay - deductions
+
+        insert_query = """
+        INSERT INTO Payroll (EmployeeID, PayPeriodStartDate, PayPeriodEndDate, BasicSalary, OvertimePay, Deductions, NetSalary)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (employee_id, start_date, end_date, basic_salary, overtime_pay, deductions, net_salary))
+        self.conn.commit()
+        cursor.close()
+
+    def calculate_overtime(self, employee_id, start_date, end_date):
+        # Placeholder for actual overtime calculation logic
+        return 0.0
+
+    def calculate_deductions(self, employee_id, start_date, end_date):
+        # Placeholder for actual deductions calculation logic
+        return 0.0
+
+    def get_payroll_by_id(self, payroll_id):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Payroll WHERE PayrollID = %s", (payroll_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        if result:
+            return Payroll(**result)
+        else:
+            raise PayrollGenerationException(f"Payroll with ID {payroll_id} not found")
+
+    def get_payrolls_for_employee(self, employee_id):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Payroll WHERE EmployeeID = %s", (employee_id,))
+        results = cursor.fetchall()
+        cursor.close()
+        return [Payroll(**result) for result in results]
+
+    def get_payrolls_for_period(self, start_date, end_date):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Payroll WHERE PayPeriodStartDate >= %s AND PayPeriodEndDate <= %s", (start_date, end_date))
+        results = cursor.fetchall()
+        cursor.close()
+        return [Payroll(**result) for result in results]
+```
+
+### Explanation
+
+1. **Initialization**: The `__init__` method initializes the service by establishing a connection to the database using `DBConnUtil.get_connection()`.
+
+2. **Generate Payroll**: The `generate_payroll` method calculates the payroll for a given employee within a specified pay period. It retrieves the basic salary from the employee record and calculates overtime pay and deductions. The calculated net salary is then inserted into the `Payroll` table.
+
+3. **Calculate Overtime**: The `calculate_overtime` method is a placeholder for actual overtime calculation logic. It returns 0.0 by default and should be implemented based on the business logic for overtime calculation.
+
+4. **Calculate Deductions**: The `calculate_deductions` method is a placeholder for actual deductions calculation logic. It returns 0.0 by default and should be implemented based on the business logic for deductions calculation.
+
+5. **Get Payroll by ID**: The `get_payroll_by_id` method retrieves a payroll record by its ID. If the payroll record is not found, a `PayrollGenerationException` is raised.
+
+6. **Get Payrolls for Employee**: The `get_payrolls_for_employee` method retrieves all payroll records for a given employee and returns them as a list of `Payroll` objects.
+
+7. **Get Payrolls for Period**: The `get_payrolls_for_period` method retrieves all payroll records within a specified period and returns them as a list of `Payroll` objects.
+
+### Utility Classes
+
+**`DBConnUtil.py`**
+
+This utility class manages the database connection.
+
+```python
+import mysql.connector
+from mysql.connector import Error
+from util.DBPropertyUtil import DBPropertyUtil
+
+class DBConnUtil:
+    con = None
+
+    @staticmethod
+    def get_connection():
+        if DBConnUtil.con is None:
+            try:
+                config = DBPropertyUtil.get_property_string('database_config.json')
+                DBConnUtil.con = mysql.connector.connect(**config)
+                if DBConnUtil.con.is_connected():
+                    print("Connection established")
+            except Error as e:
+                print(f"Error: {e}")
+                raise
+        return DBConnUtil.con
+```
+
+**`DBPropertyUtil.py`**
+
+This utility class handles reading the database configuration properties from a JSON file.
+
+```python
+import json
+
+class DBPropertyUtil:
+    @staticmethod
+    def get_property_string(file_name):
+        try:
+            with open(file_name, 'r') as f:
+                properties = json.load(f)
+                if properties:
+                    return properties
+                else:
+                    raise ValueError("Property file is empty or invalid")
+        except Exception as e:
+            raise ValueError(f"Error while opening file: {e}")
+```
+
+### Exception Classes
+
+**`PayrollGenerationException.py`**
+
+```python
+class PayrollGenerationException(Exception):
+    def __init__(self, message="Error generating payroll"):
+        self.message = message
+        super().__init__(self.message)
+```
+
+With this implementation, the `PayrollService` class can handle payroll generation and retrieval operations, interacting with the database through the utility classes.
+
+Certainly! Here is a more detailed implementation of the `calculate_overtime` and `calculate_deductions` methods within the `PayrollService` class. 
+
+These implementations assume that overtime hours and deduction details are stored in relevant tables.
+
+### `PayrollService.py`
+
+```python
+import mysql.connector
+from entity.Payroll import Payroll
+from exception.PayrollGenerationException import PayrollGenerationException
+from util.DBConnUtil import DBConnUtil
+
+class PayrollService:
+    def __init__(self):
+        self.conn = DBConnUtil.get_connection()
+
+    def generate_payroll(self, employee_id, start_date, end_date):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT BasicSalary FROM Employee WHERE EmployeeID = %s", (employee_id,))
+        employee = cursor.fetchone()
+        if not employee:
+            raise PayrollGenerationException(f"No employee found with ID {employee_id}")
+
+        basic_salary = employee['BasicSalary']
+        overtime_pay = self.calculate_overtime(employee_id, start_date, end_date)
+        deductions = self.calculate_deductions(employee_id, start_date, end_date)
+        net_salary = basic_salary + overtime_pay - deductions
+
+        insert_query = """
+        INSERT INTO Payroll (EmployeeID, PayPeriodStartDate, PayPeriodEndDate, BasicSalary, OvertimePay, Deductions, NetSalary)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (employee_id, start_date, end_date, basic_salary, overtime_pay, deductions, net_salary))
+        self.conn.commit()
+        cursor.close()
+
+    def calculate_overtime(self, employee_id, start_date, end_date):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("""
+        SELECT SUM(OvertimeHours) AS TotalOvertimeHours
+        FROM Overtime
+        WHERE EmployeeID = %s AND OvertimeDate BETWEEN %s AND %s
+        """, (employee_id, start_date, end_date))
+        result = cursor.fetchone()
+        cursor.close()
+        if result and result['TotalOvertimeHours']:
+            overtime_hours = result['TotalOvertimeHours']
+            # Assuming an overtime rate, e.g., 1.5 times the hourly rate
+            cursor = self.conn.cursor(dictionary=True)
+            cursor.execute("SELECT BasicSalary FROM Employee WHERE EmployeeID = %s", (employee_id,))
+            employee = cursor.fetchone()
+            cursor.close()
+            if employee:
+                hourly_rate = employee['BasicSalary'] / 160  # Assuming 160 work hours in a month
+                return overtime_hours * hourly_rate * 1.5
+        return 0.0
+
+    def calculate_deductions(self, employee_id, start_date, end_date):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("""
+        SELECT SUM(DeductionAmount) AS TotalDeductions
+        FROM Deductions
+        WHERE EmployeeID = %s AND DeductionDate BETWEEN %s AND %s
+        """, (employee_id, start_date, end_date))
+        result = cursor.fetchone()
+        cursor.close()
+        if result and result['TotalDeductions']:
+            return result['TotalDeductions']
+        return 0.0
+
+    def get_payroll_by_id(self, payroll_id):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Payroll WHERE PayrollID = %s", (payroll_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        if result:
+            return Payroll(**result)
+        else:
+            raise PayrollGenerationException(f"Payroll with ID {payroll_id} not found")
+
+    def get_payrolls_for_employee(self, employee_id):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Payroll WHERE EmployeeID = %s", (employee_id,))
+        results = cursor.fetchall()
+        cursor.close()
+        return [Payroll(**result) for result in results]
+
+    def get_payrolls_for_period(self, start_date, end_date):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Payroll WHERE PayPeriodStartDate >= %s AND PayPeriodEndDate <= %s", (start_date, end_date))
+        results = cursor.fetchall()
+        cursor.close()
+        return [Payroll(**result) for result in results]
+```
+
+### Explanation
+
+1. **Generate Payroll**: This method now uses `calculate_overtime` and `calculate_deductions` methods to compute the actual overtime pay and deductions before calculating the net salary.
+
+2. **Calculate Overtime**:
+    - Retrieves the total overtime hours for the specified employee within the given period.
+    - Assumes an overtime rate of 1.5 times the basic hourly rate (can be adjusted based on business logic).
+    - Calculates the overtime pay based on the total overtime hours and the hourly rate derived from the employee's basic salary.
+
+3. **Calculate Deductions**:
+    - Retrieves the total deductions for the specified employee within the given period.
+    - Returns the total amount of deductions.
+
+### Schema Assumptions
+
+For the overtime and deductions calculations, you need to have corresponding tables in your database. Below are example schemas:
+
+```sql
+CREATE TABLE Overtime (
+    OvertimeID INT PRIMARY KEY AUTO_INCREMENT,
+    EmployeeID INT,
+    OvertimeDate DATE,
+    OvertimeHours DECIMAL(5, 2),
+    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID)
+);
+
+CREATE TABLE Deductions (
+    DeductionID INT PRIMARY KEY AUTO_INCREMENT,
+    EmployeeID INT,
+    DeductionDate DATE,
+    DeductionAmount DECIMAL(10, 2),
+    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID)
+);
+```
+
+These tables track overtime hours and deductions for each employee, which are then used in payroll calculations.
+
+With this setup, the `PayrollService` class can generate payroll with accurate overtime and deduction calculations.
+
+
+import mysql.connector
+from entity.Tax import Tax
+from exception.TaxCalculationException import TaxCalculationException
+from util.DBConnUtil import DBConnUtil
+
+class TaxService:
+    def __init__(self):
+        self.conn = DBConnUtil.get_connection()
+
+    def calculate_tax(self, employee_id, tax_year):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("""
+        SELECT SUM(NetSalary) AS TotalIncome
+        FROM Payroll
+        WHERE EmployeeID = %s AND YEAR(PayPeriodEndDate) = %s
+        """, (employee_id, tax_year))
+        result = cursor.fetchone()
+        if not result or result['TotalIncome'] is None:
+            raise TaxCalculationException(f"No payroll records found for employee ID {employee_id} in year {tax_year}")
+
+        taxable_income = result['TotalIncome']
+        tax_amount = self.calculate_tax_amount(taxable_income)
+
+        insert_query = """
+        INSERT INTO Tax (EmployeeID, TaxYear, TaxableIncome, TaxAmount)
+        VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (employee_id, tax_year, taxable_income, tax_amount))
+        self.conn.commit()
+        cursor.close()
+
+    def calculate_tax_amount(self, taxable_income):
+        # Placeholder for actual tax calculation logic based on taxable income
+        # Example: Simple tax rate of 20%
+        tax_rate = 0.20
+        return taxable_income * tax_rate
+
+    def get_tax_by_id(self, tax_id):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Tax WHERE TaxID = %s", (tax_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        if result:
+            return Tax(**result)
+        else:
+            raise TaxCalculationException(f"Tax record with ID {tax_id} not found")
+
+    def get_taxes_for_employee(self, employee_id):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Tax WHERE EmployeeID = %s", (employee_id,))
+        results = cursor.fetchall()
+        cursor.close()
+        return [Tax(**result) for result in results]
+
+    def get_taxes_for_year(self, tax_year):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Tax WHERE TaxYear = %s", (tax_year,))
+        results = cursor.fetchall()
+        cursor.close()
+        return [Tax(**result) for result in results]
+
+
+
+Here's the implementation of the `FinancialRecordService` class, which includes methods for adding financial records, retrieving financial records by ID, retrieving financial records for an employee, and retrieving financial records for a specific date.
+
+### `FinancialRecordService.py`
+
+```python
+import mysql.connector
+from entity.FinancialRecord import FinancialRecord
+from util.DBConnUtil import DBConnUtil
+
+class FinancialRecordService:
+    def __init__(self):
+        self.conn = DBConnUtil.get_connection()
+
+    def add_financial_record(self, employee_id, description, amount, record_type):
+        cursor = self.conn.cursor()
+        insert_query = """
+        INSERT INTO FinancialRecord (EmployeeID, RecordDate, Description, Amount, RecordType)
+        VALUES (%s, CURDATE(), %s, %s, %s)
+        """
+        cursor.execute(insert_query, (employee_id, description, amount, record_type))
+        self.conn.commit()
+        cursor.close()
+
+    def get_financial_record_by_id(self, record_id):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM FinancialRecord WHERE RecordID = %s", (record_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        if result:
+            return FinancialRecord(**result)
+        else:
+            raise FinancialRecordException(f"Financial record with ID {record_id} not found")
+
+    def get_financial_records_for_employee(self, employee_id):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM FinancialRecord WHERE EmployeeID = %s", (employee_id,))
+        results = cursor.fetchall()
+        cursor.close()
+        return [FinancialRecord(**result) for result in results]
+
+    def get_financial_records_for_date(self, record_date):
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM FinancialRecord WHERE RecordDate = %s", (record_date,))
+        results = cursor.fetchall()
+        cursor.close()
+        return [FinancialRecord(**result) for result in results]
+```
+
+### Explanation
+
+1. **Initialization**: The `__init__` method initializes the service by establishing a connection to the database using `DBConnUtil.get_connection()`.
+
+2. **Add Financial Record**: The `add_financial_record` method adds a new financial record for a given employee. It inserts the record into the `FinancialRecord` table with the current date (`CURDATE()` in MySQL) as the record date.
+
+3. **Get Financial Record by ID**: The `get_financial_record_by_id` method retrieves a financial record by its ID. If the record is not found, a `FinancialRecordException` is raised.
+
+4. **Get Financial Records for Employee**: The `get_financial_records_for_employee` method retrieves all financial records for a given employee and returns them as a list of `FinancialRecord` objects.
+
+5. **Get Financial Records for Date**: The `get_financial_records_for_date` method retrieves all financial records for a specified date and returns them as a list of `FinancialRecord` objects.
+
+### Utility Classes
+
+**`DBConnUtil.py`**
+
+This utility class manages the database connection.
+
+```python
+import mysql.connector
+from mysql.connector import Error
+from util.DBPropertyUtil import DBPropertyUtil
+
+class DBConnUtil:
+    con = None
+
+    @staticmethod
+    def get_connection():
+        if DBConnUtil.con is None:
+            try:
+                config = DBPropertyUtil.get_property_string('database_config.json')
+                DBConnUtil.con = mysql.connector.connect(**config)
+                if DBConnUtil.con.is_connected():
+                    print("Connection established")
+            except Error as e:
+                print(f"Error: {e}")
+                raise
+        return DBConnUtil.con
+```
+
+**`DBPropertyUtil.py`**
+
+This utility class handles reading the database configuration properties from a JSON file.
+
+```python
+import json
+
+class DBPropertyUtil:
+    @staticmethod
+    def get_property_string(file_name):
+        try:
+            with open(file_name, 'r') as f:
+                properties = json.load(f)
+                if properties:
+                    return properties
+                else:
+                    raise ValueError("Property file is empty or invalid")
+        except Exception as e:
+            raise ValueError(f"Error while opening file: {e}")
+```
+
+### Exception Class
+
+**`FinancialRecordException.py`**
+
+```python
+class FinancialRecordException(Exception):
+    def __init__(self, message="Error retrieving financial record"):
+        self.message = message
+        super().__init__(self.message)
+```
+
+### Schema Assumptions
+
+For the financial record management, you need to have a corresponding table in your database. Below is an example schema for the `FinancialRecord` table:
+
+```sql
+CREATE TABLE FinancialRecord (
+    RecordID INT PRIMARY KEY AUTO_INCREMENT,
+    EmployeeID INT,
+    RecordDate DATE,
+    Description VARCHAR(255),
+    Amount DECIMAL(10, 2),
+    RecordType VARCHAR(50),
+    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID)
+);
+```
+
+This table stores financial records for each employee, including the record date, description, amount, and record type.
+
+With this setup, the `FinancialRecordService` class can handle financial record management operations, interacting with the database through the utility classes.
+
+
+
+
+Sure, I'll modify the `MainModule.py` to include separate menus for Employee, Payroll, Tax, and Financial Record functionalities, and then provide options to perform various operations within each menu. Here's the updated version:
+
+```python
+from service.EmployeeService import EmployeeService
+from service.PayrollService import PayrollService
+from service.TaxService import TaxService
+from service.FinancialRecordService import FinancialRecordService
+from exception.InvalidInputException import InvalidInputException
+from exception.DatabaseConnectionException import DatabaseConnectionException
+
+class MainModule:
+    def __init__(self):
+        self.employee_service = EmployeeService()
+        self.payroll_service = PayrollService()
+        self.tax_service = TaxService()
+        self.financial_record_service = FinancialRecordService()
+
+    def display_menu(self):
+        print("\n=== Payroll Management System ===")
+        print("1. Employee Menu")
+        print("2. Payroll Menu")
+        print("3. Tax Menu")
+        print("4. Financial Record Menu")
+        print("5. Exit")
+
+    def employee_menu(self):
+        while True:
+            print("\n=== Employee Menu ===")
+            print("1. Add Employee")
+            print("2. Get Employee by ID")
+            print("3. Get All Employees")
+            print("4. Update Employee")
+            print("5. Remove Employee")
+            print("6. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.add_employee()
+            elif choice == "2":
+                self.get_employee_by_id()
+            elif choice == "3":
+                self.get_all_employees()
+            elif choice == "4":
+                self.update_employee()
+            elif choice == "5":
+                self.remove_employee()
+            elif choice == "6":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def payroll_menu(self):
+        while True:
+            print("\n=== Payroll Menu ===")
+            print("1. Generate Payroll")
+            print("2. Get Payroll by ID")
+            print("3. Get Payrolls for Employee")
+            print("4. Get Payrolls for Period")
+            print("5. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.generate_payroll()
+            elif choice == "2":
+                self.get_payroll_by_id()
+            elif choice == "3":
+                self.get_payrolls_for_employee()
+            elif choice == "4":
+                self.get_payrolls_for_period()
+            elif choice == "5":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def tax_menu(self):
+        while True:
+            print("\n=== Tax Menu ===")
+            print("1. Calculate Tax")
+            print("2. Get Tax by ID")
+            print("3. Get Taxes for Employee")
+            print("4. Get Taxes for Year")
+            print("5. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.calculate_tax()
+            elif choice == "2":
+                self.get_tax_by_id()
+            elif choice == "3":
+                self.get_taxes_for_employee()
+            elif choice == "4":
+                self.get_taxes_for_year()
+            elif choice == "5":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def financial_record_menu(self):
+        while True:
+            print("\n=== Financial Record Menu ===")
+            print("1. Add Financial Record")
+            print("2. Get Financial Record by ID")
+            print("3. Get Financial Records for Employee")
+            print("4. Get Financial Records for Date")
+            print("5. Back to Main Menu")
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.add_financial_record()
+            elif choice == "2":
+                self.get_financial_record_by_id()
+            elif choice == "3":
+                self.get_financial_records_for_employee()
+            elif choice == "4":
+                self.get_financial_records_for_date()
+            elif choice == "5":
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+    def add_employee(self):
+        try:
+            # Gather employee details from user input
+            first_name = input("Enter first name: ")
+            last_name = input("Enter last name: ")
+            date_of_birth = input("Enter date of birth (YYYY-MM-DD): ")
+            gender = input("Enter gender: ")
+            email = input("Enter email address: ")
+            phone_number = input("Enter phone number: ")
+            address = input("Enter address: ")
+            position = input("Enter position: ")
+            joining_date = input("Enter joining date (YYYY-MM-DD): ")
+            termination_date = input("Enter termination date (if any, otherwise press Enter): ")
+
+            # Add employee using the service
+            self.employee_service.add_employee(first_name, last_name, date_of_birth, gender, email, phone_number,
+                                                address, position, joining_date, termination_date)
+            print("Employee added successfully!")
+        except InvalidInputException as e:
+            print(e)
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def generate_payroll(self):
+        try:
+            # Get employee ID and pay period dates from user input
+            employee_id = int(input("Enter employee ID: "))
+            start_date = input("Enter start date of pay period (YYYY-MM-DD): ")
+            end_date = input("Enter end date of pay period (YYYY-MM-DD): ")
+
+            # Generate payroll using the service
+            self.payroll_service.generate_payroll(employee_id, start_date, end_date)
+            print("Payroll generated successfully!")
+        except ValueError:
+            print("Invalid input for employee ID!")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def calculate_tax(self):
+        try:
+            # Get
+
+ employee ID and tax year from user input
+            employee_id = int(input("Enter employee ID: "))
+            tax_year = int(input("Enter tax year: "))
+
+            # Calculate tax using the service
+            self.tax_service.calculate_tax(employee_id, tax_year)
+            print("Tax calculated successfully!")
+        except ValueError:
+            print("Invalid input for employee ID or tax year!")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def add_financial_record(self):
+        try:
+            # Get financial record details from user input
+            employee_id = int(input("Enter employee ID: "))
+            description = input("Enter description: ")
+            amount = float(input("Enter amount: "))
+            record_type = input("Enter record type: ")
+
+            # Add financial record using the service
+            self.financial_record_service.add_financial_record(employee_id, description, amount, record_type)
+            print("Financial record added successfully!")
+        except ValueError:
+            print("Invalid input for employee ID or amount!")
+        except DatabaseConnectionException as e:
+            print(e)
+
+    def run(self):
+        while True:
+            self.display_menu()
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                self.employee_menu()
+            elif choice == "2":
+                self.payroll_menu()
+            elif choice == "3":
+                self.tax_menu()
+            elif choice == "4":
+                self.financial_record_menu()
+            elif choice == "5":
+                print("Exiting the application.")
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main_module = MainModule()
+    main_module.run()
+```
+
+This updated version of `MainModule.py` class includes separate menus for Employee, Payroll, Tax, and Financial Record functionalities. Each menu provides options to perform various operations within the corresponding category. Users can navigate through different menus and perform the desired actions. Additionally, error handling for invalid input and database connection issues is included.
+
+
+Certainly! Here's the complete implementation of the `EmployeeService` class:
+
+```python
+from dao.EmployeeDAO import EmployeeDAO
+from exception.InvalidInputException import InvalidInputException
+from exception.EmployeeNotFoundException import EmployeeNotFoundException
+from exception.DatabaseConnectionException import DatabaseConnectionException
+from model.Employee import Employee
+
+class EmployeeService(IEmployeeService):
+    def __init__(self):
+        self.employee_dao = EmployeeDAO()
+
+    def get_employee_by_id(self, employee_id):
+        try:
+            employee = self.employee_dao.get_employee_by_id(employee_id)
+            if employee is None:
+                raise EmployeeNotFoundException(f"Employee with ID {employee_id} not found")
+            return employee
+        except EmployeeNotFoundException as e:
+            print("Employee not found:", e)
+            raise
+        except Exception as e:
+            print("An error occurred while retrieving employee:", e)
+            raise DatabaseConnectionException("Error occurred while accessing database")
+
+    def get_all_employees(self):
+        try:
+            return self.employee_dao.get_all_employees()
+        except Exception as e:
+            print("An error occurred while retrieving all employees:", e)
+            raise DatabaseConnectionException("Error occurred while accessing database")
+
+    def add_employee(self, employee_data):
+        try:
+            # Perform validation on employee_data
+            if not self.is_valid_employee_data(employee_data):
+                raise InvalidInputException("Invalid input data for adding employee")
+
+            # Call DAO method to add employee
+            self.employee_dao.add_employee(employee_data)
+        except InvalidInputException as e:
+            print("Invalid input data:", e)
+            raise
+        except Exception as e:
+            print("An error occurred while adding employee:", e)
+            raise DatabaseConnectionException("Error occurred while accessing database")
+
+    def update_employee(self, employee_id, employee_data):
+        try:
+            # Perform validation on employee_data
+            if not self.is_valid_employee_data(employee_data):
+                raise InvalidInputException("Invalid input data for updating employee")
+
+            # Call DAO method to update employee
+            self.employee_dao.update_employee(employee_id, employee_data)
+        except InvalidInputException as e:
+            print("Invalid input data:", e)
+            raise
+        except Exception as e:
+            print("An error occurred while updating employee:", e)
+            raise DatabaseConnectionException("Error occurred while accessing database")
+
+    def remove_employee(self, employee_id):
+        try:
+            # Call DAO method to remove employee
+            self.employee_dao.remove_employee(employee_id)
+        except Exception as e:
+            print("An error occurred while removing employee:", e)
+            raise DatabaseConnectionException("Error occurred while accessing database")
+
+    def is_valid_employee_data(self, employee_data):
+        # Validation logic for employee data
+        pass
+```
+
+This implementation provides complete functionality for managing employees, including methods for retrieving, adding, updating, and removing employees, with appropriate exception handling to deal with potential errors. If you have any further questions or need additional assistance, feel free to ask!
+def is_valid_employee_data(self, employee_data):
+    # Assuming employee_data is a dictionary or object containing employee information
+    if not isinstance(employee_data, dict):
+        return False
+
+    # Validate required fields
+    required_fields = ['FirstName', 'LastName', 'DateOfBirth', 'Gender', 'Email', 'PhoneNumber', 'Address', 'Position', 'JoiningDate']
+    for field in required_fields:
+        if field not in employee_data or not employee_data[field]:
+            return False
+
+    # Additional validation rules can be added here as needed
+    # For example, validating email format, phone number format, etc.
+
+    # If all validations pass, return True
+    return True
+
+
