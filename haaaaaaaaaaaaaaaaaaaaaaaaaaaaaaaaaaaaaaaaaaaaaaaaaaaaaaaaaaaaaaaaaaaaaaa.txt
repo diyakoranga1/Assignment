@@ -1,45 +1,16 @@
-from service.IEmployeeService import IEmployeeService
-from exception import DatabaseConnectionException, EmployeeNotFoundException
-from entity.employee import Employee
-from util.DBConnUtil import DBConnUtil
+class Employee:
+    def __init__(self, employee_id, first_name, last_name, date_of_birth, gender, email, phone_number, address, position, joining_date, termination_date):
+        self.__employee_id = employee_id
+        self.__first_name = first_name
+        self.__last_name = last_name
+        self.__date_of_birth = date_of_birth
+        self.__gender = gender
+        self.__email = email
+        self.__phone_number = phone_number
+        self.__address = address
+        self.__position = position
+        self.__joining_date = joining_date
+        self.__termination_date = termination_date
 
-class EmployeeService(IEmployeeService):
-    def __init__(self):
-        self.db_conn = DBConnUtil.get_connection()
-
-    def add_employee(self, employee):
-        try:
-            cursor = self.db_conn.cursor()
-            query = "INSERT INTO Employee (FirstName, LastName, DateOfBirth, Gender, Email, PhoneNumber, Address, Position, JoiningDate, TerminationDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            cursor.execute(query, (employee.get_first_name(), employee.get_last_name(), employee.get_date_of_birth(), employee.get_gender(), employee.get_email(), employee.get_phone_number(), employee.get_address(), employee.get_position(), employee.get_joining_date(), employee.get_termination_date()))
-            self.db_conn.commit()
-            cursor.close()
-        except Exception as e:
-            raise DatabaseConnectionException("Error adding employee to database.") from e
-
-
-
- def add_employee(self):
-        try:
-            # Gather employee details from user input
-            first_name = input("Enter first name: ")
-            last_name = input("Enter last name: ")
-            date_of_birth = input("Enter date of birth (YYYY-MM-DD): ")
-            gender = input("Enter gender: ")
-            email = input("Enter email address: ")
-            phone_number = input("Enter phone number: ")
-            address = input("Enter address: ")
-            position = input("Enter position: ")
-            joining_date = input("Enter joining date (YYYY-MM-DD): ")
-            termination_date = input("Enter termination date (if any, otherwise press Enter): ")
-
-            # Create an instance of the Employee class with the required attributes
-            employee = Employee(first_name, last_name, date_of_birth, gender, email, phone_number, address, position, joining_date, termination_date)
-
-            # Add employee using the service
-            self.employee_service.add_employee(employee)
-            print("Employee added successfully!")
-        except InvalidInputException as e:
-            print(e)
-        except DatabaseConnectionException as e:
-            print(e)
+    def __str__(self):
+        return f"Employee ID: {self.__employee_id}, Name: {self.__first_name} {self.__last_name}, Email: {self.__email}, Position: {self.__position}"
