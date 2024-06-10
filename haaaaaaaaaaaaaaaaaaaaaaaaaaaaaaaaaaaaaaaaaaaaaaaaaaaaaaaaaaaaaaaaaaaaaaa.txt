@@ -1,27 +1,127 @@
-import mysql.connector
-import json
+from abc import ABC, abstractmethod
+from entity.employee import Employee
+from typing import List
 
-class DBConnection:
-    con = None
+class IEmployeeService(ABC):
+    @abstractmethod
+    def get_employee_by_id(self, employee_id: int) -> Employee:
+        pass
+    
+    @abstractmethod
+    def get_all_employees(self) -> List[Employee]:
+        pass
+    
+    @abstractmethod
+    def add_employee(self, employee: Employee):
+        pass
+    
+    @abstractmethod
+    def update_employee(self, employee: Employee):
+        pass
+    
+    @abstractmethod
+    def remove_employee(self, employee_id: int):
+        pass
 
-    @staticmethod
-    def get_connection():
-        if DBConnection.con is None:
-            con_path = "../configs/database_config.json"
-            con_string = PropertyUtil.get_property_string(con_path)
-            try:
-                DBConnection.con = mysql.connector.connect(**con_string)
-                return DBConnection.con
-            except Exception as e:
-                raise DatabaseConnectionException("Error connecting to the database.") from e
-        else:
-            return DBConnection.con
-class PropertyUtil:
-    @staticmethod
-    def get_property_string(file_name):
+
+
+from service.IEmployeeService import IEmployeeService
+from exception import DatabaseConnectionException, EmployeeNotFoundException
+from entity.employee import Employee
+from util.DBConnUtil import DBConnUtil
+
+class EmployeeService(IEmployeeService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()
+
+    def get_employee_by_id(self, employee_id):
         try:
-            with open(file_name) as f:
-                json_f = json.load(f)
-                return json_f
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Employee WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            employee_data = cursor.fetchone()
+            cursor.close()
+            if employee_data:
+                return Employee(*employee_data)
+            else:
+                raise EmployeeNotFoundException("Employee not found.")
         except Exception as e:
-            print(f"Error while opening files: {e}.")
+            raise DatabaseConnectionException("Error fetching employee data from database.") from e
+
+    def get_all_employees(self):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "SELECT * FROM Employee"
+            cursor.execute(query)
+            employees_data = cursor.fetchall()
+            cursor.close()
+            employees = []
+            for employee_data in employees_data:
+                employees.append(Employee(*employee_data))
+            return employees
+        except Exception as e:
+            raise DatabaseConnectionException("Error fetching employees data from database.") from e
+
+    def add_employee(self, employee):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO Employee (FirstName, LastName, DateOfBirth, Gender, Email, PhoneNumber, Address, Position, JoiningDate, TerminationDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(query, (employee.first_name, employee.last_name, employee.date_of_birth, employee.gender, employee.email, employee.phone_number, employee.address, employee.position, employee.joining_date, employee.termination_date))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error adding employee to database.") from e
+
+    def update_employee(self, employee):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "UPDATE Employee SET FirstName = %s, LastName = %s, DateOfBirth = %s, Gender = %s, Email = %s, PhoneNumber = %s, Address = %s, Position = %s, JoiningDate = %s, TerminationDate = %s WHERE EmployeeID = %s"
+            cursor.execute(query, (employee.first_name, employee.last_name, employee.date_of_birth, employee.gender, employee.email, employee.phone_number, employee.address, employee.position, employee.joining_date, employee.termination_date, employee.employee_id))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error updating employee in database.") from e
+
+    def remove_employee(self, employee_id):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "DELETE FROM Employee WHERE EmployeeID = %s"
+            cursor.execute(query, (employee_id,))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error removing employee from database.") from e
+
+
+
+
+
+
+
+
+def add_employee(self):
+        try:
+            # Gather employee details from user input
+            first_name = input("Enter first name: ")
+            last_name = input("Enter last name: ")
+            date_of_birth = input("Enter date of birth (YYYY-MM-DD): ")
+            gender = input("Enter gender: ")
+            email = input("Enter email address: ")
+            phone_number = input("Enter phone number: ")
+            address = input("Enter address: ")
+            position = input("Enter position: ")
+            joining_date = input("Enter joining date (YYYY-MM-DD): ")
+            termination_date = input("Enter termination date (if any, otherwise press Enter): ")
+
+            # Create an instance of the Employee class with the required attributes
+            employee = Employee(first_name, last_name, date_of_birth, gender, email, phone_number, address, position, joining_date, termination_date)
+
+            # Add employee using the service
+            self.employee_service.add_employee(employee)
+            print("Employee added successfully!")
+        except InvalidInputException as e:
+            print(e)
+        except DatabaseConnectionException as e:
+            print(e)
+
+    # Impleme
