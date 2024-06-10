@@ -1338,3 +1338,119 @@ class DBConnection:
 ```
 
 Note: I've assumed that the `database_config.json` file contains the connection string for the database. Adjust the `PropertyUtil` class according to your actual JSON file structure. Additionally, the `DatabaseConnectionException` class is assumed to be defined in another file. Make sure to import it if necessary.
+
+
+
+
+
+
+
+
+
+
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+
+namespace CarRentalSystem.Tests
+{
+    [TestFixture]
+    public class PayrollManagementSystemTests
+    {
+        private EmployeeService employeeService;
+        private PayrollService payrollService;
+        private TaxService taxService;
+
+        // This method is executed before each test method
+        [SetUp]
+        public void Setup()
+        {
+            // Initialize services before each test
+            employeeService = new EmployeeService();
+            payrollService = new PayrollService();
+            taxService = new TaxService();
+        }
+
+        // Test case to verify the calculation of gross salary for an employee
+        [Test]
+        public void CalculateGrossSalaryForEmployee_CorrectCalculation()
+        {
+            // Arrange
+            Employee employee = new Employee(1, "John", "Doe", new DateTime(1990, 1, 1), "Male", "john.doe@example.com", "1234567890", "Address", "Manager", new DateTime(2020, 1, 1));
+            double expectedGrossSalary = 40 * 25.0; // Assuming hourly rate is $25 and worked 40 hours
+
+            // Act
+            double actualGrossSalary = employee.CalculateGrossSalary();
+
+            // Assert
+            Assert.AreEqual(expectedGrossSalary, actualGrossSalary);
+        }
+
+        // Test case to ensure the correct calculation of net salary after deductions
+        [Test]
+        public void CalculateNetSalaryAfterDeductions_CorrectCalculation()
+        {
+            // Arrange
+            double grossSalary = 2000; // Assuming gross salary is $2000
+            double expectedNetSalary = grossSalary - 500; // Assuming deductions are $500
+
+            // Act
+            double actualNetSalary = payrollService.CalculateNetSalaryAfterDeductions(grossSalary, 500);
+
+            // Assert
+            Assert.AreEqual(expectedNetSalary, actualNetSalary);
+        }
+
+        // Test case to verify the tax calculation for a high-income employee
+        [Test]
+        public void VerifyTaxCalculationForHighIncomeEmployee_CorrectCalculation()
+        {
+            // Arrange
+            Employee employee = new Employee(1, "Jane", "Smith", new DateTime(1985, 1, 1), "Female", "jane.smith@example.com", "9876543210", "Address", "Director", new DateTime(2019, 1, 1));
+            double grossSalary = 10000; // Assuming gross salary is $10000
+            double expectedTaxAmount = 2500; // Assuming tax rate for high-income employee is 25%
+
+            // Act
+            double actualTaxAmount = taxService.CalculateTaxForEmployee(employee, grossSalary);
+
+            // Assert
+            Assert.AreEqual(expectedTaxAmount, actualTaxAmount);
+        }
+
+        // Test case to verify end-to-end payroll processing for a batch of employees
+        [Test]
+        public void ProcessPayrollForMultipleEmployees_EndToEndProcessing()
+        {
+            // Arrange
+            List<Employee> employees = new List<Employee>
+            {
+                new Employee(1, "John", "Doe", new DateTime(1990, 1, 1), "Male", "john.doe@example.com", "1234567890", "Address", "Manager", new DateTime(2020, 1, 1)),
+                new Employee(2, "Jane", "Smith", new DateTime(1985, 1, 1), "Female", "jane.smith@example.com", "9876543210", "Address", "Director", new DateTime(2019, 1, 1))
+            };
+            DateTime payPeriodStartDate = new DateTime(2024, 6, 1);
+            DateTime payPeriodEndDate = new DateTime(2024, 6, 15);
+
+            // Act
+            payrollService.ProcessPayrollForEmployees(employees, payPeriodStartDate, payPeriodEndDate);
+
+            // Assert
+            // Add assertions to verify payroll processing
+        }
+
+        // Test case to verify error handling for invalid employee data
+        [Test]
+        public void VerifyErrorHandlingForInvalidEmployeeData_HandlesInvalidDataGracefully()
+        {
+            // Arrange
+            Employee employee = new Employee(1, "Invalid", "Data", new DateTime(2000, 1, 1), "Male", "invalid.data@example.com", "1234567890", "Address", "Invalid Position", new DateTime(2020, 1, 1));
+            double grossSalary = -1000; // Negative gross salary
+            double deductions = 500; // Assuming deductions are $500
+
+            // Act & Assert
+            // Ensure that the system handles invalid data gracefully by not crashing and possibly logging the error
+            Assert.DoesNotThrow(() => employee.CalculateGrossSalary());
+            Assert.DoesNotThrow(() => payrollService.CalculateNetSalaryAfterDeductions(grossSalary, deductions));
+            // Add more assertions as needed
+        }
+    }
+}
