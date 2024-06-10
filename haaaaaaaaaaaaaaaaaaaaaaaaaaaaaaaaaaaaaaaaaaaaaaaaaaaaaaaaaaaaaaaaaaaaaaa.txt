@@ -1,14 +1,25 @@
-def add_employee(self, employee):
-    try:
-        cursor = self.db_conn.cursor()
-        query = "INSERT INTO Employee (FirstName, LastName, DateOfBirth, Gender, Email, PhoneNumber, Address, Position, JoiningDate, TerminationDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        cursor.execute(query, (employee.first_name, employee.last_name, employee.date_of_birth, employee.gender, employee.email, employee.phone_number, employee.address, employee.position, employee.joining_date, employee.termination_date))
-        self.db_conn.commit()
-        cursor.close()
-    except Exception as e:
-        raise DatabaseConnectionException("Error adding employee to database.") from e
+from service.IEmployeeService import IEmployeeService
+from exception import DatabaseConnectionException, EmployeeNotFoundException
+from entity.employee import Employee
+from util.DBConnUtil import DBConnUtil
 
-    def add_employee(self):
+class EmployeeService(IEmployeeService):
+    def __init__(self):
+        self.db_conn = DBConnUtil.get_connection()
+
+    def add_employee(self, employee):
+        try:
+            cursor = self.db_conn.cursor()
+            query = "INSERT INTO Employee (FirstName, LastName, DateOfBirth, Gender, Email, PhoneNumber, Address, Position, JoiningDate, TerminationDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(query, (employee.get_first_name(), employee.get_last_name(), employee.get_date_of_birth(), employee.get_gender(), employee.get_email(), employee.get_phone_number(), employee.get_address(), employee.get_position(), employee.get_joining_date(), employee.get_termination_date()))
+            self.db_conn.commit()
+            cursor.close()
+        except Exception as e:
+            raise DatabaseConnectionException("Error adding employee to database.") from e
+
+
+
+ def add_employee(self):
         try:
             # Gather employee details from user input
             first_name = input("Enter first name: ")
