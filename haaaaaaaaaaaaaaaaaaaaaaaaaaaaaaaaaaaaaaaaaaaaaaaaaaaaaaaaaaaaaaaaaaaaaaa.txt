@@ -1,5 +1,6 @@
+from typing import List
 from service.IPayrollService import IPayrollService
-from exception import DatabaseConnectionException, PayrollGenerationException
+from exception import DatabaseConnectionException
 from entity.payroll import Payroll
 from util.DBConnUtil import DBConnUtil
 
@@ -8,80 +9,168 @@ class PayrollService(IPayrollService):
         self.db_conn = DBConnUtil.get_connection()
 
     def generate_payroll(self, employee_id: int, start_date: str, end_date: str):
+        """
+        Generate payroll for an employee within a specified period.
+
+        Parameters:
+            employee_id (int): The ID of the employee for whom payroll is to be generated.
+            start_date (str): The start date of the payroll period (YYYY-MM-DD).
+            end_date (str): The end date of the payroll period (YYYY-MM-DD).
+
+        Raises:
+            DatabaseConnectionException: If there's an error connecting to the database.
+        """
         try:
-            # Fetch employee details from the database based on employee_id
-            employee = self.get_employee_details(employee_id)
-
-            # Calculate the salary based on employee's position, hours worked, etc.
-            salary = self.calculate_salary(employee)
-
-            # Deduct taxes, insurance, etc. from the salary to get net pay
-            net_pay = self.calculate_net_pay(salary)
-
-            # Create a Payroll object with the calculated values and insert it into the database
-            payroll = Payroll(employee_id, start_date, end_date, salary, net_pay)
-            self.insert_payroll(payroll)
-
-            return payroll  # Return the generated payroll object
+            # Calculate total hours worked by the employee during the period
+            total_hours_worked = self.calculate_total_hours_worked(employee_id, start_date, end_date)
+            
+            # Get hourly rate of the employee
+            hourly_rate = self.get_hourly_rate(employee_id)
+            
+            # Calculate total salary
+            total_salary = total_hours_worked * hourly_rate
+            
+            # Create a Payroll object
+            payroll = Payroll(employee_id, start_date, end_date, total_salary)
+            
+            # Save the payroll to the database
+            self.save_payroll(payroll)
         except Exception as e:
-            raise PayrollGenerationException("Error generating payroll.") from e
+            raise DatabaseConnectionException("Error generating payroll.") from e
 
-    def get_employee_details(self, employee_id: int):
+    def calculate_total_hours_worked(self, employee_id: int, start_date: str, end_date: str) -> float:
+        """
+        Calculate the total hours worked by an employee within a specified period.
+
+        Parameters:
+            employee_id (int): The ID of the employee.
+            start_date (str): The start date of the period.
+            end_date (str): The end date of the period.
+
+        Returns:
+            float: The total hours worked by the employee.
+
+        Raises:
+            DatabaseConnectionException: If there's an error connecting to the database.
+        """
         try:
+            # Connect to the database
             cursor = self.db_conn.cursor()
-            query = "SELECT * FROM Employee WHERE EmployeeID = %s"
+
+            # Query to calculate total hours worked
+            query = """
+                SELECT SUM(hours_worked) FROM timesheet
+                WHERE employee_id = %s AND date BETWEEN %s AND %s
+            """
+            cursor.execute(query, (employee_id, start_date, end_date))
+            total_hours = cursor.fetchone()[0] or 0  # Handle case where no hours are logged
+
+            cursor.close()
+            return total_hours
+        except Exception as e:
+            raise DatabaseConnectionException("Error calculating total hours worked.") from e
+
+    def get_hourly_rate(self, employee_id: int) -> float:
+        """
+        Retrieve the hourly rate of an employee.
+
+        Parameters:
+            employee_id (int): The ID of the employee.
+
+        Returns:
+            float: The hourly rate of the employee.
+
+        Raises:
+            DatabaseConnectionException: If there's an error connecting to the database.
+        """
+        try:
+            # Connect to the database
+            cursor = self.db_conn.cursor()
+
+            # Query to fetch hourly rate
+            query = "SELECT hourly_rate FROM employee WHERE employee_id = %s"
             cursor.execute(query, (employee_id,))
-            employee_data = cursor.fetchone()
+            hourly_rate = cursor.fetchone()[0]  # Assuming hourly_rate is a column in the employee table
+
             cursor.close()
-            if employee_data:
-                # Return employee details as a dictionary or an object
-                return employee_data
-            else:
-                raise DatabaseConnectionException("Employee not found.")
+            return hourly_rate
         except Exception as e:
-            raise DatabaseConnectionException("Error fetching employee details from database.") from e
+            raise DatabaseConnectionException("Error fetching hourly rate.") from e
 
-    def calculate_salary(self, employee):
-        # Placeholder logic to calculate salary based on employee's position, hours worked, etc.
-        # Sample logic: Calculate salary based on hourly rate and hours worked
-        hourly_rate = 25  # Example hourly rate
-        hours_worked = 40  # Example hours worked
-        return hourly_rate * hours_worked
+    def save_payroll(self, payroll: Payroll):
+        """
+        Save the payroll information to the database.
 
-    def calculate_net_pay(self, gross_salary):
-        # Placeholder logic to deduct taxes, insurance, etc. from the gross salary to get net pay
-        # Sample logic: Deduct 20% for taxes
-        tax_rate = 0.2
-        return gross_salary * (1 - tax_rate)
+        Parameters:
+            payroll (Payroll): The Payroll object to be saved.
 
-    def insert_payroll(self, payroll):
+        Raises:
+            DatabaseConnectionException: If there's an error connecting to the database.
+        """
         try:
+            # Connect to the database
             cursor = self.db_conn.cursor()
-            query = "INSERT INTO Payroll (EmployeeID, StartDate, EndDate, Salary, NetPay) VALUES (%s, %s, %s, %s, %s)"
-            cursor.execute(query, (payroll.employee_id, payroll.start_date, payroll.end_date, payroll.salary, payroll.net_pay))
+
+            # Insert payroll data into the database
+            query = """
+                INSERT INTO payroll (employee_id, start_date, end_date, total_salary)
+                VALUES (%s, %s, %s, %s)
+            """
+            cursor.execute(query, (payroll.employee_id, payroll.start_date, payroll.end_date, payroll.total_salary))
             self.db_conn.commit()
+
             cursor.close()
         except Exception as e:
-            raise DatabaseConnectionException("Error inserting payroll into database.") from e
+            raise DatabaseConnectionException("Error saving payroll.") from e
+
+
 
 
 from abc import ABC, abstractmethod
-from typing import List
-from entity.payroll import Payroll
 
 class IPayrollService(ABC):
     @abstractmethod
     def generate_payroll(self, employee_id: int, start_date: str, end_date: str):
-        pass
-    
+        """
+        Generate payroll for an employee within a specified period.
+
+        Parameters:
+            employee_id (int): The ID of the employee for whom payroll is to be generated.
+            start_date (str): The start date of the payroll period (YYYY-MM-DD).
+            end_date (str): The end date of the payroll period (YYYY-MM-DD).
+        """
+
     @abstractmethod
-    def get_payroll_by_id(self, payroll_id: int) -> Payroll:
-        pass
-    
+    def calculate_total_hours_worked(self, employee_id: int, start_date: str, end_date: str) -> float:
+        """
+        Calculate the total hours worked by an employee within a specified period.
+
+        Parameters:
+            employee_id (int): The ID of the employee.
+            start_date (str): The start date of the period.
+            end_date (str): The end date of the period.
+
+        Returns:
+            float: The total hours worked by the employee.
+        """
+
     @abstractmethod
-    def get_payrolls_for_employee(self, employee_id: int) -> List[Payroll]:
-        pass
-    
+    def get_hourly_rate(self, employee_id: int) -> float:
+        """
+        Retrieve the hourly rate of an employee.
+
+        Parameters:
+            employee_id (int): The ID of the employee.
+
+        Returns:
+            float: The hourly rate of the employee.
+        """
+
     @abstractmethod
-    def get_payrolls_for_period(self, start_date: str, end_date: str) -> List[Payroll]:
-        pass
+    def save_payroll(self, payroll):
+        """
+        Save the payroll information to the database.
+
+        Parameters:
+            payroll: The Payroll object to be saved.
+        """
