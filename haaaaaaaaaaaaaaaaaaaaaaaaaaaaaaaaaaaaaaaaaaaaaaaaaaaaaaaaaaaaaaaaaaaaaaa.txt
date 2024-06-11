@@ -1,176 +1,904 @@
-from typing import List
-from service.IPayrollService import IPayrollService
-from exception import DatabaseConnectionException
-from entity.payroll import Payroll
-from util.DBConnUtil import DBConnUtil
+from .ITaxService import ITaxService
 
-class PayrollService(IPayrollService):
-    def __init__(self):
-        self.db_conn = DBConnUtil.get_connection()
 
-    def generate_payroll(self, employee_id: int, start_date: str, end_date: str):
-        """
-        Generate payroll for an employee within a specified period.
+class TaxServiceImpl(ITaxService):
+    def __init__(self, db_connection):
+        self.db_connection = db_connection
 
-        Parameters:
-            employee_id (int): The ID of the employee for whom payroll is to be generated.
-            start_date (str): The start date of the payroll period (YYYY-MM-DD).
-            end_date (str): The end date of the payroll period (YYYY-MM-DD).
+    def calculate_tax_on_income(self, empID, taxYear):
+        query = ("SELECT BasicSalary+OvertimePay-Deductions FROM payroll WHERE EmployeeID=%s AND "
+                 "YEAR(PayPeriodStartDate)=%s")
+        values = (empID, taxYear)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        if result is None:
+            raise Exception("DataNotFound")
+        taxableIncome = float(result[0])
+        if 2020 <= taxYear <= 2022:
+            if taxableIncome < 40000.00:
+                taxAmount = 0
+            elif 40000.00 < taxableIncome <= 75000.00:
+                taxAmount = taxableIncome * 0.06
+            elif 75000.00 < taxableIncome <= 100000.00:
+                taxAmount = taxableIncome * 0.11
+            elif 100000.00 < taxableIncome <= 150000.00:
+                taxAmount = taxableIncome * 0.20
+            else:
+                taxAmount = taxableIncome * 0.30
+        elif taxYear >= 2023:
+            if taxableIncome < 42000.00:
+                taxAmount = 0
+            elif 42000.00 < taxableIncome <= 80000.00:
+                taxAmount = taxableIncome * 0.07
+            elif 80000.00 < taxableIncome <= 120000.00:
+                taxAmount = taxableIncome * 0.14
+            elif 120000.00 < taxableIncome <= 180000.00:
+                taxAmount = taxableIncome * 0.24
+            else:
+                taxAmount = taxableIncome * 0.32
 
-        Raises:
-            DatabaseConnectionException: If there's an error connecting to the database.
-        """
-        try:
-            # Calculate total hours worked by the employee during the period
-            total_hours_worked = self.calculate_total_hours_worked(employee_id, start_date, end_date)
-            
-            # Get hourly rate of the employee
-            hourly_rate = self.get_hourly_rate(employee_id)
-            
-            # Calculate total salary
-            total_salary = total_hours_worked * hourly_rate
-            
-            # Create a Payroll object
-            payroll = Payroll(employee_id, start_date, end_date, total_salary)
-            
-            # Save the payroll to the database
-            self.save_payroll(payroll)
-        except Exception as e:
-            raise DatabaseConnectionException("Error generating payroll.") from e
+        return round(taxAmount, 2)
 
-    def calculate_total_hours_worked(self, employee_id: int, start_date: str, end_date: str) -> float:
-        """
-        Calculate the total hours worked by an employee within a specified period.
+    def calculate_tax(self):
+        employeeID = int(input("Enter EmployeeID: "))
+        taxYear = int(input("Enter Tax Year: "))
+        self.add_tax_to_db(employeeID, taxYear)
+        taxAmount = self.calculate_tax_on_income(employeeID, taxYear)
+        query = "UPDATE tax SET TaxAmount=%s WHERE EmployeeID=%s AND TaxYear=%s"
+        values = (taxAmount, employeeID, taxYear)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        self.db_connection.commit()
+        cursor.close()
+        return f"Tax Amount for employeeID {employeeID} for {taxYear} is {taxAmount}"
 
-        Parameters:
-            employee_id (int): The ID of the employee.
-            start_date (str): The start date of the period.
-            end_date (str): The end date of the period.
+    def update_net_salary(self, empID, taxYear):
+        query = ("UPDATE payroll SET NetSalary=%s WHERE EmployeeID=%s AND "
+                 "YEAR(PayPeriodStartDate)=%s")
+        amount = float(self.get_net_salary(empID, taxYear))
+        taxAmount = float(self.calculate_tax_on_income(empID, taxYear))
+        salary = amount - taxAmount
+        values = (salary, empID, taxYear)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        self.db_connection.commit()
+        cursor.close()
+        return True
 
-        Returns:
-            float: The total hours worked by the employee.
+    def get_tax_by_id(self, taxID):
+        query = "SELECT EmployeeID, TaxAmount FROM tax WHERE TaxID = %s"
+        values = (taxID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        if result is not None:
+            return f"EmployeeID: {result[0]}\nTaxAmount: {result[1]}"
+        else:
+            raise Exception("TaxIDNotFound")
 
-        Raises:
-            DatabaseConnectionException: If there's an error connecting to the database.
-        """
-        try:
-            # Connect to the database
-            cursor = self.db_conn.cursor()
+    def get_taxes_for_employee(self, employeeID):
+        query = "SELECT EmployeeID, TaxYear, TaxAmount FROM tax WHERE EmployeeID = %s"
+        values = (employeeID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
 
-            # Query to calculate total hours worked
-            query = """
-                SELECT SUM(hours_worked) FROM timesheet
-                WHERE employee_id = %s AND date BETWEEN %s AND %s
-            """
-            cursor.execute(query, (employee_id, start_date, end_date))
-            total_hours = cursor.fetchone()[0] or 0  # Handle case where no hours are logged
+    def get_taxes_for_year(self, taxYear):
+        query = "SELECT TaxYear, TaxAmount FROM tax WHERE TaxYear = %s"
+        values = (taxYear,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
 
+    def get_net_salary(self, empID, taxYear):
+        query = ("SELECT BasicSalary+OvertimePay-Deductions FROM payroll WHERE EmployeeID=%s AND "
+                 "YEAR(PayPeriodStartDate)=%s")
+        values = (empID, taxYear)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        if result is None:
+            raise Exception("NetSalaryNotFound")
+        return result[0]
+
+    def no_of_tax_id(self):
+        query = "SELECT COUNT(*) FROM tax"
+        cursor = self.db_connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        cursor.close()
+        return result[0]
+
+    def generate_unique_tax_id(self):
+        empID = int(self.no_of_tax_id()) + 1
+        while True:
+            if self.check_tax_id(empID) is None:
+                return empID
+            else:
+                empID = empID + 1
+
+    def check_tax_id(self, taxID):
+        query = f"SELECT * FROM tax WHERE TaxID={taxID}"
+        cursor = self.db_connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        cursor.close()
+        return result
+
+    def add_tax_to_db(self, empID, taxYear):
+        query = "INSERT INTO tax VALUES(%s, %s, %s, %s, %s)"
+        values = (self.generate_unique_tax_id(), empID, taxYear, self.get_net_salary(empID, taxYear),
+                  self.calculate_tax_on_income(empID, taxYear))
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        self.db_connection.commit()
+        cursor.close()
+
+
+
+
+
+from .IPayrollService import IPayrollService
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+
+class PayrollServiceImpl(IPayrollService):
+    def __init__(self, db_connection):
+        self.db_connection = db_connection
+
+    def generate_payroll(self, employeeID):
+        if self.get_employee_by_id(employeeID) is None:
+            raise Exception("EmployeeNotFoundException")
+
+        startDate = datetime.now().strftime('%Y-%m-%d')
+        endDate = (datetime.now() + relativedelta(years=1)).strftime('%Y-%m-%d')
+
+        positionQuery = f"SELECT Position FROM employee WHERE EmployeeID={employeeID}"
+        cursor = self.db_connection.cursor()
+        cursor.execute(positionQuery)
+        res = cursor.fetchone()[0]
+
+        if res == 'Engineer':
+            setBasicSalary = 95000.00
+            setOvertimePay = 3000.00
+            setDeductions = 6000.00
+        elif res == 'Manager':
+            setBasicSalary = 120000.00
+            setOvertimePay = 6000.00
+            setDeductions = 8000.00
+        elif res == 'Specialist':
+            setBasicSalary = 80000.00
+            setOvertimePay = 1000.00
+            setDeductions = 3000.00
+        elif res == 'Analyst':
+            setBasicSalary = 91200.00
+            setOvertimePay = 3000.00
+            setDeductions = 5500.00
+        elif res == 'Supervisor':
+            setBasicSalary = 135000.00
+            setOvertimePay = 4500.00
+            setDeductions = 10000.00
+        elif res == 'Coordinator':
+            setBasicSalary = 100000.00
+            setOvertimePay = 2000.00
+            setDeductions = 7500.00
+        elif res == 'Technician':
+            setBasicSalary = 60000.00
+            setOvertimePay = 800.00
+            setDeductions = 1000.00
+        elif res == 'Director':
+            setBasicSalary = 160000.00
+            setOvertimePay = 8000.00
+            setDeductions = 20000.00
+        else:
+            setBasicSalary = 200000.00
+            setOvertimePay = 15000.00
+            setDeductions = 32000.00
+
+        setNetSalary = setBasicSalary + setOvertimePay - setDeductions
+
+        query = '''INSERT INTO payroll
+                    VALUES(%s, %s, %s, %s, %s, %s, %s, %s)
+                '''
+        values = (
+            self.generate_unique_payroll_id(), employeeID, startDate, endDate, setBasicSalary, setOvertimePay,
+            setDeductions,
+            setNetSalary)
+        cursor.execute(query, values)
+        self.db_connection.commit()
+        cursor.close()
+        return values[0]
+
+    def get_payroll_by_id(self, payrollID):
+        query = "SELECT * FROM payroll WHERE PayrollID=%s"
+        values = (payrollID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        if not result:
+            raise Exception("PayrollIDNotFoundException")
+        else:
+            return result
+
+    def get_payrolls_for_employee(self):
+        employeeID = int(input("Enter the employeeID: "))
+        employee_data = self.get_employee_by_id(employeeID)
+        if not employee_data:
+            raise Exception("EmployeeNotFoundException")
+        query = "SELECT p.* FROM payroll p JOIN employee e ON p.EmployeeID = e.EmployeeID WHERE p.EmployeeID = %s"
+        values = (employeeID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+
+    def get_payrolls_for_period(self):
+        startDateStr = input("Enter the start date: ")
+        endDateStr = input("Enter the end date: ")
+        startDate = datetime.strptime(startDateStr, "%Y-%m-%d")
+        endDate = datetime.strptime(endDateStr, "%Y-%m-%d")
+        if startDate > endDate:
+            raise Exception("InvalidDateInputException")
+        query = "SELECT * FROM payroll p WHERE p.PayPeriodStartDate >= %s AND p.PayPeriodEndDate <= %s"
+        values = (startDate, endDate)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+
+    def get_employee_by_id(self, empID):
+        query = "SELECT * FROM employee WHERE EmployeeID = %s"
+        values = (empID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        return result
+
+    def get_net_salary(self, empID, taxYear):
+        query = ("SELECT BasicSalary+OvertimePay-Deductions FROM payroll WHERE EmployeeID=%s AND "
+                 "YEAR(PayPeriodStartDate)=%s")
+        values = (empID, taxYear)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        if result is None:
+            raise Exception("NetSalaryNotFound")
+        return result[0]
+
+    def get_no_of_payrolls(self):
+        query = "SELECT COUNT(*) FROM payroll"
+        cursor = self.db_connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        cursor.close()
+        return result[0]
+
+    def generate_unique_payroll_id(self):
+        payrollID = int(self.get_no_of_payrolls()) + 1
+        return payrollID
+
+
+
+
+import re
+from datetime import datetime
+from prettytable import PrettyTable
+
+
+class EmployeeServiceImpl(IEmployeeService):
+
+    def __init__(self, db_connection):
+        self.db_connection = db_connection
+
+    def get_employee_by_id(self, empID: int):
+        query = "SELECT * FROM employee WHERE EmployeeID = %s"
+        values = (empID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        return result
+
+    def get_all_employees(self):
+        query = "SELECT * FROM employee"
+        cursor = self.db_connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+
+    def add_employee(self):
+        print("Enter employee information:")
+        employee = {
+            'empID': self.generate_unique_employee_id(),
+            'firstName': input("Enter your first name: "),
+            'lastName': input("Enter your last name: "),
+            'dob': input("Enter your DOB in (YYYY-MM-DD) format: "),
+            'gender': input("Enter your gender (Male or Female): ").capitalize(),
+            'email': input("Enter your Email ID: "),
+            'phone': input("Enter your Phone Number: "),
+            'address': input("Enter your Address: "),
+            'position': input("Enter your position: "),
+            'joiningDate': datetime.now().strftime("%Y-%m-%d")
+        }
+
+        if not self.check_email_id(employee['email']):
+            raise Exception("Email ID already exists.")
+        if not self.check_phone_number(employee['phone']):
+            raise Exception("Phone number already exists.")
+
+        if self.check_employee_data_validation(employee):
+            query = ("INSERT INTO employee (EmployeeID, FirstName, LastName, DateOfBirth, Gender, Email, PhoneNumber, "
+                     "Address, Position, JoiningDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
+            values = (
+                employee['empID'], employee['firstName'], employee['lastName'], employee['dob'], employee['gender'],
+                employee['email'].lower(), employee['phone'], employee['address'], employee['position'],
+                employee['joiningDate'])
+            cursor = self.db_connection.cursor()
+            cursor.execute(query, values)
+            self.db_connection.commit()
             cursor.close()
-            return total_hours
-        except Exception as e:
-            raise DatabaseConnectionException("Error calculating total hours worked.") from e
+            print("SUCCESS: Employee Added!")
+        else:
+            raise Exception("Invalid Data Found.")
 
-    def get_hourly_rate(self, employee_id: int) -> float:
-        """
-        Retrieve the hourly rate of an employee.
+    def update_employee(self):
+        empID = int(input("Enter your Employee ID: "))
+        employee = self.get_employee_by_id(empID)
+        if employee is None:
+            raise Exception("Employee not found.")
 
-        Parameters:
-            employee_id (int): The ID of the employee.
+        while True:
+            print("\nWhat do you want to update?")
+            print("1. Email")
+            print("2. Phone Number")
+            print("3. Address")
+            print("4. Position")
+            print("5. Termination Date")
+            print("6. Exit")
+            ch = int(input("Enter your choice: "))
+            cursor = self.db_connection.cursor()
+            if ch == 1:
+                new_email = input("Enter your new email ID: ")
+                if not self.valid_email(new_email):
+                    raise Exception("Invalid Email ID")
+                if not self.check_email_id(new_email):
+                    raise Exception("Email ID already exists.")
+                query = "UPDATE employee SET Email = %s WHERE EmployeeID = %s"
+                values = (new_email.lower(), empID)
+                cursor.execute(query, values)
+                self.db_connection.commit()
+                print("Email Updated to", new_email)
+            elif ch == 2:
+                new_phone = input("Enter your new phone number: ")
+                if not self.check_email_id(new_phone):
+                    raise Exception("Phone number already exists.")
+                query = "UPDATE employee SET PhoneNumber = %s WHERE EmployeeID = %s"
+                values = (new_phone, empID)
+                cursor.execute(query, values)
+                self.db_connection.commit()
+                print("Phone Number Updated to", new_phone)
+            elif ch == 3:
+                new_address = input("Enter your new address: ")
+                query = "UPDATE employee SET Address = %s WHERE EmployeeID = %s"
+                values = (new_address, empID)
+                cursor.execute(query, values)
+                self.db_connection.commit()
+                print("Address Updated to", new_address)
+            elif ch == 4:
+                new_position = input("Enter your new position: ")
+                query = "UPDATE employee SET Position = %s WHERE EmployeeID = %s"
+                values = (new_position, empID)
+                cursor.execute(query, values)
+                self.db_connection.commit()
+                print("Position Updated to", new_position)
+            elif ch == 5:
+                termination_date = input("Enter your termination date in (YYYY-MM-DD) format: ")
+                query = "UPDATE employee SET TerminationDate = %s WHERE EmployeeID = %s"
+                values = (termination_date, empID)
+                cursor.execute(query, values)
+                self.db_connection.commit()
+                print("Termination Date Updated to", termination_date)
+            else:
+                break
+        cursor.close()
 
-        Returns:
-            float: The hourly rate of the employee.
+    def remove_employee(self):
+        empID = int(input("Enter the Employee ID you want to remove: "))
+        if self.get_employee_by_id(empID) is None:
+            raise Exception("Employee not found.")
+        query = "DELETE FROM employee WHERE EmployeeID = %s"
+        values = (empID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        self.db_connection.commit()
+        cursor.close()
+        print("Success: Employee removed!")
 
-        Raises:
-            DatabaseConnectionException: If there's an error connecting to the database.
-        """
+    def get_no_of_employees(self):
+        query = "SELECT COUNT(*) FROM employee"
+        cursor = self.db_connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        cursor.close()
+        return result[0]
+
+    def generate_unique_employee_id(self):
+        empID = int(self.get_no_of_employees()) + 1
+        while True:
+            if self.check_employee_id(empID) is None:
+                return empID
+            else:
+                empID += 1
+
+        def check_phone_number(self, phone):
+        query = "SELECT PhoneNumber FROM employee"
+        cursor = self.db_connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        for res in result:
+            if phone == res[0]:
+                return False
+        return True
+
+    def valid_email(self, email):
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        if not re.fullmatch(regex, email):
+            print("Invalid Email Entered!!!")
+            return False
+        return True
+
+    def check_employee_data_validation(self, employee):
+        if not employee['firstName'] or not employee['lastName'] or not employee['dob'] or not employee['gender'] or not \
+                employee['email'] or not employee['phone'] or not employee['address'] or not employee['position']:
+            print("Error: All fields must be filled.")
+            return False
+
         try:
-            # Connect to the database
-            cursor = self.db_conn.cursor()
+            datetime.strptime(employee['dob'], "%Y-%m-%d")
+        except ValueError:
+            print("Error: Invalid date format. Please use YYYY-MM-DD.")
+            return False
 
-            # Query to fetch hourly rate
-            query = "SELECT hourly_rate FROM employee WHERE employee_id = %s"
-            cursor.execute(query, (employee_id,))
-            hourly_rate = cursor.fetchone()[0]  # Assuming hourly_rate is a column in the employee table
+        if not self.valid_email(employee['email']):
+            return False
 
-            cursor.close()
-            return hourly_rate
-        except Exception as e:
-            raise DatabaseConnectionException("Error fetching hourly rate.") from e
+        if employee['gender'].lower() not in ['male', 'female']:
+            print("Error: Gender must be either 'Male' or 'Female'.")
+            return False
 
-    def save_payroll(self, payroll: Payroll):
-        """
-        Save the payroll information to the database.
+        return True
 
-        Parameters:
-            payroll (Payroll): The Payroll object to be saved.
+    def check_employee_id(self, empID: int):
+        query = "SELECT * FROM employee WHERE EmployeeID = %s"
+        values = (empID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        return result
 
-        Raises:
-            DatabaseConnectionException: If there's an error connecting to the database.
-        """
+    def update_net_salary(self, empID, taxYear):
+        query = "UPDATE payroll SET NetSalary=%s WHERE EmployeeID=%s AND YEAR(PayPeriodStartDate)=%s"
+        amount = float(self.get_net_salary(empID, taxYear))
+        taxAmount = float(self.calculate_tax_on_income(empID, taxYear))
+        salary = amount - taxAmount
+        values = (salary, empID, taxYear)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        self.db_connection.commit()
+        cursor.close()
+        return True
+
+    def get_net_salary(self, empID, taxYear):
+        query = ("SELECT BasicSalary+OvertimePay-Deductions FROM payroll WHERE EmployeeID=%s AND YEAR("
+                 "PayPeriodStartDate)= %s")
+        values = (empID, taxYear)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        if result is None:
+            raise Exception("Net Salary not found.")
+        return result[0]
+
+    def get_no_of_employees(self):
+        query = "SELECT COUNT(*) FROM employee"
+        cursor = self.db_connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        cursor.close()
+        return result[0]
+
+    def generate_unique_tax_id(self):
+        taxID = int(self.get_no_of_taxes()) + 1
+        while True:
+            if self.check_tax_id(taxID) is None:
+                return taxID
+            else:
+                taxID += 1
+
+    def check_tax_id(self, taxID):
+        query = "SELECT * FROM tax WHERE TaxID = %s"
+        values = (taxID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        return result
+
+    def get_no_of_taxes(self):
+        query = "SELECT COUNT(*) FROM tax"
+        cursor = self.db_connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        cursor.close()
+        return result[0]
+    def check_email_id(self, email):
+        query = "SELECT Email FROM employee"
+        cursor = self.db_connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        if email not in (res[0] for res in result):
+            return True
+        else:
+            return False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       
+
+
+
+
+
+
+
+from .ITaxService import ITaxService
+from prettytable import PrettyTable
+
+
+class TaxServiceImpl(ITaxService):
+    def __init__(self, db_connection):
+        self.db_connection = db_connection
+
+    def show_results_table(self, columns, result):
+        table = PrettyTable(columns)
+        print()
+        for res in result:
+            table.add_row(res)
+        print(table)
+
+    def calculate_tax_on_income(self, empID, taxYear):
+        query1 = ("SELECT BasicSalary+OvertimePay-Deductions FROM payroll WHERE EmployeeID=%s AND "
+                  "YEAR(PayPeriodStartDate) = %s")
+        values = (empID, taxYear)
+        taxAmount = 0
+        cursor = self.db_connection.cursor()
+        cursor.execute(query1, values)
+        result = cursor.fetchone()
+        cursor.close()
+        if result is None:
+            raise Exception("DataNotFound")
+        taxableIncome = float(result[0])
+        if 2020 <= taxYear <= 2022:
+            if taxableIncome < 40000.00:
+                taxAmount = 0
+            elif 40000.00 < taxableIncome <= 75000.00:
+                taxAmount = taxableIncome * 0.06
+            elif 75000.00 < taxableIncome <= 100000.00:
+                taxAmount = taxableIncome * 0.11
+            elif 100000.00 < taxableIncome <= 150000.00:
+                taxAmount = taxableIncome * 0.20
+            else:
+                taxAmount = taxableIncome * 0.30
+        elif taxYear >= 2023:
+            if taxableIncome < 42000.00:
+                taxAmount = 0
+            elif 42000.00 < taxableIncome <= 80000.00:
+                taxAmount = taxableIncome * 0.07
+            elif 80000.00 < taxableIncome <= 120000.00:
+                taxAmount = taxableIncome * 0.14
+            elif 120000.00 < taxableIncome <= 180000.00:
+                taxAmount = taxableIncome * 0.24
+            else:
+                taxAmount = taxableIncome * 0.32
+
+        return round(taxAmount, 2)
+
+    def calculate_tax(self):
+        employeeID = int(input("Enter EmployeeID: "))
+        if self.get_employee_by_id(employeeID) is None:
+            raise Exception("EmployeeNotFoundException")
+
+        taxYear = int(input("Enter Tax Year: "))
+        self.add_tax_to_db(employeeID, taxYear)
+        taxAmount = self.calculate_tax_on_income(employeeID, taxYear)
+        query = "UPDATE tax SET TaxAmount=%s WHERE EmployeeID=%s AND TaxYear=%s"
+        values = (taxAmount, employeeID, taxYear)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        self.db_connection.commit()
+        cursor.close()
+        return f"Tax Amount for employeeID {employeeID} for {taxYear} is {taxAmount}"
+
+    def update_net_salary(self, empID, taxYear):
+        query = "UPDATE payroll SET NetSalary=%s WHERE EmployeeID=%s AND YEAR(PayPeriodStartDate)=%s"
+        amount = float(self.get_net_sal(empID, taxYear))
+        taxAmount = float(self.calculate_tax_on_income(empID, taxYear))
+        salary = amount - taxAmount
+        values = (salary, empID, taxYear)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        self.db_connection.commit()
+        cursor.close()
+        return True
+
+    def get_tax_by_id(self, taxID):
+        query = "SELECT EmployeeID, TaxAmount FROM tax WHERE TaxID = %s"
+        values = (taxID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        if result is not None:
+            return f"EmployeeID: {result[0]}\nTaxAmount: {result[1]}"
+        else:
+            raise Exception("TaxIDNotFound")
+
+    def get_taxes_for_employee(self, employeeID):
+        query = "SELECT EmployeeID, TaxYear, TaxAmount FROM tax WHERE EmployeeID = %s"
+        values = (employeeID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+
+    def get_taxes_for_year(self, taxYear):
+        query = "SELECT TaxYear, TaxAmount FROM tax WHERE TaxYear = %s"
+        values = (taxYear,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+
+    def get_employee_by_id(self, empID: int):
+        query = "SELECT * FROM employee WHERE EmployeeID = %s"
+        values = (empID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        return result
+
+    def get_net_sal(self, empID, taxYear):
+        query1 = ("SELECT BasicSalary+OvertimePay-Deductions FROM payroll WHERE EmployeeID=%s AND "
+                  "YEAR(PayPeriodStartDate) = %s")
+        values = (empID, taxYear)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query1, values)
+        result = cursor.fetchone()
+        cursor.close()
+        if result is None:
+            raise Exception("NetSalaryNotFound")
+        return result[0]
+
+    def no_of_tax_id(self):
+        query = "SELECT COUNT(*) FROM tax"
+        cursor = self.db_connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        cursor.close()
+        return result[0]
+
+    def generate_unique_tax_id(self):
+        empID = int(self.no_of_tax_id()) + 1
+        while True:
+            if self.check_tax_id(empID) is None:
+                return empID
+            else:
+                empID = empID + 1
+
+    def check_tax_id(self, taxID):
+        query = "SELECT * FROM tax WHERE TaxID = %s"
+        values = (taxID,)
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        result = cursor.fetchone()
+        cursor.close()
+        return result
+
+    def add_tax_to_db(self, empID, taxYear):
+        query = "INSERT INTO tax VALUES(%s, %s, %s, %s, %s)"
+        values = (self.generate_unique_tax_id(), empID, taxYear, self.get_net_sal(empID, taxYear),
+                  self.calculate_tax_on_income(empID, taxYear))
+        cursor = self.db_connection.cursor()
+        cursor.execute(query, values)
+        self.db_connection.commit()
+        cursor.close()
+        return True
+
+
+
+
+
+
+
+
+
+from PyCharm.CaseStudy.PayXpert.Classes.dao.EmployeeServiceImpl import EmployeeServiceImpl
+from PyCharm.CaseStudy.PayXpert.Classes.dao.PayrollServiceImpl import PayrollServiceImpl
+from PyCharm.CaseStudy.PayXpert.Classes.dao.FinancialRecordServiceImpl import FinancialRecordServiceImpl
+from PyCharm.CaseStudy.PayXpert.Classes.dao.TaxServiceImpl import TaxServiceImpl
+from util.DBConnection import DBConnection
+
+class PayXpertApp:
+    def main(self):
         try:
-            # Connect to the database
-            cursor = self.db_conn.cursor()
-
-            # Insert payroll data into the database
-            query = """
-                INSERT INTO payroll (employee_id, start_date, end_date, total_salary)
-                VALUES (%s, %s, %s, %s)
-            """
-            cursor.execute(query, (payroll.employee_id, payroll.start_date, payroll.end_date, payroll.total_salary))
-            self.db_conn.commit()
-
-            cursor.close()
+            dbutil = DBConnection.get_connection()
         except Exception as e:
-            raise DatabaseConnectionException("Error saving payroll.") from e
+            raise Exception(f"Error Connecting Server: {e}")
+        esl = EmployeeServiceImpl(dbutil)
+        psl = PayrollServiceImpl(dbutil)
+        frsl = FinancialRecordServiceImpl(dbutil)
+        tsl = TaxServiceImpl(dbutil)
 
+        print("\nWelcome to PayXpert! Your One Stop Payroll Manager.")
+        while True:
+            print()
+            print("Which service do you want to use?")
+            print("1. Employee Service")
+            print("2. Payroll Service")
+            print("3. Tax Service")
+            print("4. Financial Record Service")
+            print("5. Exit App")
+            ch = int(input("Enter: "))
+            if ch == 1:
+                print()
+                print("Welcome to the Employee Service")
+                while True:
+                    print("\nWhat do you want to do?")
+                    print("1. Get All Employee Information")
+                    print("2. Get Employee By ID")
+                    print("3. Register Employee in the database")
+                    print("4. Update Employee Information")
+                    print("5. Remove Employee from Database")
+                    print("6. Exit Employee Service")
+                    sc = int(input("Enter: "))
+                    if sc == 1:
+                        esl.GetAllEmployees()
+                    elif sc == 2:
+                        empID = int(input("Enter employeeID: "))
+                        esl.GetEmployeeByID(empID)
+                    elif sc == 3:
+                        esl.AddEmployee()
+                    elif sc == 4:
+                        esl.UpdateEmployee()
+                    elif sc == 5:
+                        esl.RemoveEmployee()
+                    else:
+                        break
+            elif ch == 2:
+                print()
+                print("Welcome to the Payroll Service")
+                while True:
+                    print("\nWhat do you want to do?")
+                    print("1. Generate Payroll Information")
+                    print("2. Get Payroll By ID")
+                    print("3. Get Payrolls For Employee")
+                    print("4. Get Payrolls For Period")
+                    print("5. Exit Payroll Service")
+                    tc = int(input("Enter: "))
+                    if tc == 1:
+                        employeeID = int(input("Enter the employeeID: "))
+                        res = psl.GeneratePayroll(employeeID)
+                        if res is not None:
+                            print(f"Successfully generated payroll for employeeID: {employeeID} with payrollID: {res}")
+                            print("Generated NET SALARY is without involving tax. To calculate net salary accurately, check tax services.")
+                        else:
+                            print("Error: Could Not generate Payroll!")
+                    elif tc == 2:
+                        payrollID = int(input("Enter the payrollID: "))
+                        psl.GetPayrollById(payrollID)
+                    elif tc == 3:
+                        psl.GetPayrollsForEmployee()
+                    elif tc == 4:
+                        psl.GetPayrollsForPeriod()
+                    else:
+                        break
+            elif ch == 3:
+                print()
+                print("Welcome to the Tax Service")
+                while True:
+                    print("\nWhat do you want to do?")
+                    print("1. Calculate Total Tax")
+                    print("2. Get Tax By Id")
+                    print("3. Get Taxes For Employee")
+                    print("4. Update Net Salary for Employee")
+                    print("5. Get Taxes For Year")
+                    print("6. Exit Payment Service")
+                    tc = int(input("Enter: "))
+                    if tc == 1:
+                        print(tsl.CalculateTax())
+                    elif tc == 2:
+                        taxID = int(input("Enter TaxID: "))
+                        print(tsl.GetTaxById(taxID))
+                    elif tc == 3:
+                        employeeID = int(input("Enter the employeeID: "))
+                        tsl.GetTaxesForEmployee(employeeID)
+                    elif tc == 4:
+                        employeeID = int(input("Enter the employeeID: "))
+                        taxYear = int(input("Enter the Tax Year: "))
+                        if tsl.updateNetSalary(employeeID, taxYear):
+                            print("Success: Update Net Salary Successfully!")
+                    elif tc == 5:
+                        taxYear = int(input("Enter the Tax Year: "))
+                        tsl.GetTaxesForYear(taxYear)
+                    else:
+                        break
+            elif ch == 4:
+                print()
+                print("Welcome to the Financial Record Service")
+                while True:
+                    print("\nWhat do you want to use?")
+                    print("1. Add a Financial Record")
+                    print("2. Get Financial Record By ID")
+                    print("3. Get Financial Records For Employee")
+                    print("4. Get Financial Records For Date")
+                    print("5. Generate Financial Report")
+                    print("6. Exit Service")
+                    tc = int(input("Enter: "))
+                    if tc == 1:
+                        frsl.AddFinancialRecord()
+                        print("Successfully Added to the Database!")
+                    elif tc == 2:
+                        frsl.GetFinancialRecordById()
+                    elif tc == 3:
+                        frsl.GetFinancialRecordsForEmployee()
+                    elif tc == 4:
+                        frsl.GetFinancialRecordsForDate()
+                    elif tc == 5:
+                        frsl.FinancialReportGeneration()
+                    else:
+                        break
+            else:
+                dbutil.close()
+                print("Thank You for using the Service!!!")
+                break
 
-
-
-from abc import ABC, abstractmethod
-
-class IPayrollService(ABC):
-    @abstractmethod
-    def generate_payroll(self, employee_id: int, start_date: str, end_date: str):
-        """
-        Generate payroll for an employee within a specified period.
-
-        Parameters:
-            employee_id (int): The ID of the employee for whom payroll is to be generated.
-            start_date (str): The start date of the payroll period (YYYY-MM-DD).
-            end_date (str): The end date of the payroll period (YYYY-MM-DD).
-        """
-
-    @abstractmethod
-    def calculate_total_hours_worked(self, employee_id: int, start_date: str, end_date: str) -> float:
-        """
-        Calculate the total hours worked by an employee within a specified period.
-
-        Parameters:
-            employee_id (int): The ID of the employee.
-            start_date (str): The start date of the period.
-            end_date (str): The end date of the period.
-
-        Returns:
-            float: The total hours worked by the employee.
-        """
-
-    @abstractmethod
-    def get_hourly_rate(self, employee_id: int) -> float:
-        """
-        Retrieve the hourly rate of an employee.
-
-        Parameters:
-            employee_id (int): The ID of the employee.
-
-        Returns:
-            float: The hourly rate of the employee.
-        """
-
-    @abstractmethod
-    def save_payroll(self, payroll):
-        """
-        Save the payroll information to the database.
-
-        Parameters:
-            payroll: The Payroll object to be saved.
-        """
+if __name__ == '__main__':
+    obj = PayXpertApp()
+    obj.main()
