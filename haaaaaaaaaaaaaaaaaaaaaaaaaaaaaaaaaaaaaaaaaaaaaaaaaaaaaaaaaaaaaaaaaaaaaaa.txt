@@ -1,4 +1,17 @@
-Certainly! Let's organize the React app with a `components` folder for the UI components and a `services` folder for the API service functions. Below is a structured approach to achieve this:
+Certainly! I'll create a well-organized React application with proper routing, role-based authentication, and a functional payroll management system. Here's how we'll approach it:
+
+1. **Setup React Router**: Use React Router to manage routes.
+2. **Authentication**: Implement role-based authentication and protect routes.
+3. **Components**: Create and organize components for various functionalities.
+4. **Styling**: Use basic CSS for styling.
+
+### Step 1: Setup React Router
+
+First, install React Router:
+
+```bash
+npm install react-router-dom
+```
 
 ### Directory Structure
 
@@ -11,11 +24,26 @@ my-react-app/
 │   ├── components/
 │   │   ├── EmployeeList.js
 │   │   ├── AddEmployee.js
+│   │   ├── UpdateEmployee.js
+│   │   ├── DeleteEmployee.js
 │   │   ├── AddPayroll.js
+│   │   ├── ListPayrolls.js
 │   │   ├── GenerateTax.js
+│   │   ├── ListTaxes.js
 │   │   ├── CreateFinancialRecord.js
+│   │   ├── ListFinancialRecords.js
+│   │   ├── Login.js
+│   │   ├── Signup.js
+│   │   ├── Navbar.js
 │   ├── services/
 │   │   ├── api.js
+│   ├── pages/
+│   │   ├── Home.js
+│   │   ├── Dashboard.js
+│   │   ├── EmployeeManagement.js
+│   │   ├── PayrollManagement.js
+│   │   ├── TaxManagement.js
+│   │   ├── FinancialRecordManagement.js
 │   ├── App.js
 │   ├── index.js
 │   ├── App.css
@@ -23,535 +51,367 @@ my-react-app/
 └── .gitignore
 ```
 
-### Step-by-Step Implementation
+### Step 2: Create Components
 
-#### 1. Initialize React App
-
-First, create a new React app using `create-react-app`:
-
-```bash
-npx create-react-app my-react-app
-cd my-react-app
-```
-
-#### 2. Install Axios for HTTP Requests
-
-Install Axios:
-
-```bash
-npm install axios
-```
-
-#### 3. Define API Service Functions
-
-Create the `services/api.js` file:
+#### Navbar Component
 
 ```javascript
-// src/services/api.js
+// src/components/Navbar.js
 
-import axios from 'axios';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-const API_URL = 'http://localhost:8000';
-
-export const getEmployees = async () => {
-  const response = await axios.get(`${API_URL}/employees`);
-  return response.data;
+const Navbar = ({ user, onLogout }) => {
+  return (
+    <nav>
+      <ul>
+        <li><Link to="/">Home</Link></li>
+        {user && user.role === 'admin' && (
+          <>
+            <li><Link to="/employees">Employees</Link></li>
+            <li><Link to="/payrolls">Payrolls</Link></li>
+            <li><Link to="/taxes">Taxes</Link></li>
+            <li><Link to="/financial-records">Financial Records</Link></li>
+          </>
+        )}
+        {user && (
+          <>
+            <li><Link to="/dashboard">Dashboard</Link></li>
+            <li><button onClick={onLogout}>Logout</button></li>
+          </>
+        )}
+        {!user && (
+          <>
+            <li><Link to="/login">Login</Link></li>
+            <li><Link to="/signup">Signup</Link></li>
+          </>
+        )}
+      </ul>
+    </nav>
+  );
 };
 
-export const createEmployee = async (employee) => {
-  const response = await axios.post(`${API_URL}/employees`, employee);
-  return response.data;
-};
-
-export const generateTax = async (employeeId, taxYear) => {
-  const response = await axios.post(`${API_URL}/taxes/generate`, {
-    employee_id: employeeId,
-    tax_year: taxYear,
-  });
-  return response.data;
-};
-
-export const getPayrolls = async () => {
-  const response = await axios.get(`${API_URL}/payrolls`);
-  return response.data;
-};
-
-export const createPayroll = async (payroll) => {
-  const response = await axios.post(`${API_URL}/payrolls`, payroll);
-  return response.data;
-};
-
-export const getFinancialRecords = async () => {
-  const response = await axios.get(`${API_URL}/financial_records`);
-  return response.data;
-};
-
-export const createFinancialRecord = async (record) => {
-  const response = await axios.post(`${API_URL}/financial_records`, record);
-  return response.data;
-};
+export default Navbar;
 ```
 
-#### 4. Create React Components
-
-##### `EmployeeList.js`
-
-This component will display the list of employees:
+#### Login Component
 
 ```javascript
-// src/components/EmployeeList.js
+// src/components/Login.js
 
-import React, { useEffect, useState } from 'react';
-import { getEmployees } from '../services/api';
+import React, { useState } from 'react';
+import { login, getUserDetails } from '../services/api';
+import { useHistory } from 'react-router-dom';
 
-const EmployeeList = () => {
-  const [employees, setEmployees] = useState([]);
+const Login = ({ setToken, setUser }) => {
+  const [form, setForm] = useState({ username: '', password: '' });
+  const history = useHistory();
 
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      const data = await getEmployees();
-      setEmployees(data);
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
 
-    fetchEmployees();
-  }, []);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = await login(form);
+    setToken(token.access_token);
+    const user = await getUserDetails(token.access_token);
+    setUser(user);
+    history.push('/dashboard');
+  };
 
   return (
+    <form onSubmit={handleSubmit}>
+      <h2>Login</h2>
+      <input
+        type="text"
+        name="username"
+        value={form.username}
+        onChange={handleChange}
+        placeholder="Username"
+        required
+      />
+      <input
+        type="password"
+        name="password"
+        value={form.password}
+        onChange={handleChange}
+        placeholder="Password"
+        required
+      />
+      <button type="submit">Login</button>
+    </form>
+  );
+};
+
+export default Login;
+```
+
+#### Signup Component
+
+```javascript
+// src/components/Signup.js
+
+import React, { useState } from 'react';
+import { signup } from '../services/api';
+import { useHistory } from 'react-router-dom';
+
+const Signup = () => {
+  const [form, setForm] = useState({ username: '', password: '', role: 'employee' });
+  const history = useHistory();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await signup(form);
+    history.push('/login');
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <h2>Signup</h2>
+      <input
+        type="text"
+        name="username"
+        value={form.username}
+        onChange={handleChange}
+        placeholder="Username"
+        required
+      />
+      <input
+        type="password"
+        name="password"
+        value={form.password}
+        onChange={handleChange}
+        placeholder="Password"
+        required
+      />
+      <select name="role" value={form.role} onChange={handleChange}>
+        <option value="employee">Employee</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button type="submit">Signup</button>
+    </form>
+  );
+};
+
+export default Signup;
+```
+
+#### Other Components
+
+I'll provide a few more components for managing employees, payrolls, taxes, and financial records. You can create similar ones for the other entities.
+
+### Pages
+
+#### Home Page
+
+```javascript
+// src/pages/Home.js
+
+import React from 'react';
+
+const Home = () => {
+  return (
     <div>
-      <h2>Employee List</h2>
+      <h2>Welcome to the Employee Management System</h2>
+    </div>
+  );
+};
+
+export default Home;
+```
+
+#### Dashboard Page
+
+```javascript
+// src/pages/Dashboard.js
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const Dashboard = () => {
+  return (
+    <div>
+      <h2>Dashboard</h2>
       <ul>
-        {employees.map((employee) => (
-          <li key={employee.employee_id}>
-            {employee.first_name} {employee.last_name} - {employee.email}
-          </li>
-        ))}
+        <li><Link to="/employees">Manage Employees</Link></li>
+        <li><Link to="/payrolls">Manage Payrolls</Link></li>
+        <li><Link to="/taxes">Manage Taxes</Link></li>
+        <li><Link to="/financial-records">Manage Financial Records</Link></li>
       </ul>
     </div>
   );
 };
 
-export default EmployeeList;
+export default Dashboard;
 ```
 
-##### `AddEmployee.js`
-
-This component will handle the creation of new employees:
+#### EmployeeManagement Page
 
 ```javascript
-// src/components/AddEmployee.js
+// src/pages/EmployeeManagement.js
 
-import React, { useState } from 'react';
-import { createEmployee } from '../services/api';
+import React from 'react';
+import AddEmployee from '../components/AddEmployee';
+import UpdateEmployee from '../components/UpdateEmployee';
+import DeleteEmployee from '../components/DeleteEmployee';
+import EmployeeList from '../components/EmployeeList';
 
-const AddEmployee = () => {
-  const [employee, setEmployee] = useState({
-    first_name: '',
-    last_name: '',
-    date_of_birth: '',
-    gender: '',
-    email: '',
-    phone_number: '',
-    address: '',
-    position: '',
-    joining_date: '',
-    termination_date: '',
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEmployee({ ...employee, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await createEmployee(employee);
-    setEmployee({
-      first_name: '',
-      last_name: '',
-      date_of_birth: '',
-      gender: '',
-      email: '',
-      phone_number: '',
-      address: '',
-      position: '',
-      joining_date: '',
-      termination_date: '',
-    });
-  };
-
+const EmployeeManagement = ({ token }) => {
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Add Employee</h2>
-      <input
-        type="text"
-        name="first_name"
-        value={employee.first_name}
-        onChange={handleChange}
-        placeholder="First Name"
-        required
-      />
-      <input
-        type="text"
-        name="last_name"
-        value={employee.last_name}
-        onChange={handleChange}
-        placeholder="Last Name"
-        required
-      />
-      <input
-        type="date"
-        name="date_of_birth"
-        value={employee.date_of_birth}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="text"
-        name="gender"
-        value={employee.gender}
-        onChange={handleChange}
-        placeholder="Gender"
-        required
-      />
-      <input
-        type="email"
-        name="email"
-        value={employee.email}
-        onChange={handleChange}
-        placeholder="Email"
-        required
-      />
-      <input
-        type="text"
-        name="phone_number"
-        value={employee.phone_number}
-        onChange={handleChange}
-        placeholder="Phone Number"
-        required
-      />
-      <input
-        type="text"
-        name="address"
-        value={employee.address}
-        onChange={handleChange}
-        placeholder="Address"
-        required
-      />
-      <input
-        type="text"
-        name="position"
-        value={employee.position}
-        onChange={handleChange}
-        placeholder="Position"
-        required
-      />
-      <input
-        type="date"
-        name="joining_date"
-        value={employee.joining_date}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="date"
-        name="termination_date"
-        value={employee.termination_date}
-        onChange={handleChange}
-        placeholder="Termination Date"
-      />
-      <button type="submit">Add Employee</button>
-    </form>
+    <div>
+      <h2>Employee Management</h2>
+      <AddEmployee token={token} />
+      <UpdateEmployee token={token} />
+      <DeleteEmployee token={token} />
+      <EmployeeList token={token} />
+    </div>
   );
 };
 
-export default AddEmployee;
+export default EmployeeManagement;
 ```
 
-##### `AddPayroll.js`
-
-This component will handle the creation of payroll records:
+#### PayrollManagement Page
 
 ```javascript
-// src/components/AddPayroll.js
+// src/pages/PayrollManagement.js
 
-import React, { useState } from 'react';
-import { createPayroll } from '../services/api';
+import React from 'react';
+import AddPayroll from '../components/AddPayroll';
+import ListPayrolls from '../components/ListPayrolls';
 
-const AddPayroll = () => {
-  const [payroll, setPayroll] = useState({
-    employee_id: '',
-    pay_period_start_date: '',
-    pay_period_end_date: '',
-    basic_salary: '',
-    overtime_pay: '',
-    deductions: '',
-    net_salary: '',
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setPayroll({ ...payroll, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await createPayroll(payroll);
-    setPayroll({
-      employee_id: '',
-      pay_period_start_date: '',
-      pay_period_end_date: '',
-      basic_salary: '',
-      overtime_pay: '',
-      deductions: '',
-      net_salary: '',
-    });
-  };
-
+const PayrollManagement = ({ token }) => {
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Add Payroll</h2>
-      <input
-        type="number"
-        name="employee_id"
-        value={payroll.employee_id}
-        onChange={handleChange}
-        placeholder="Employee ID"
-        required
-      />
-      <input
-        type="date"
-        name="pay_period_start_date"
-        value={payroll.pay_period_start_date}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="date"
-        name="pay_period_end_date"
-        value={payroll.pay_period_end_date}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="number"
-        name="basic_salary"
-        value={payroll.basic_salary}
-        onChange={handleChange}
-        placeholder="Basic Salary"
-        required
-      />
-      <input
-        type="number"
-        name="overtime_pay"
-        value={payroll.overtime_pay}
-        onChange={handleChange}
-        placeholder="Overtime Pay"
-        required
-      />
-      <input
-        type="number"
-        name="deductions"
-        value={payroll.deductions}
-        onChange={handleChange}
-        placeholder="Deductions"
-        required
-      />
-      <input
-        type="number"
-        name="net_salary"
-        value={payroll.net_salary}
-        onChange={handleChange}
-        placeholder="Net Salary"
-        required
-      />
-      <button type="submit">Add Payroll</button>
-    </form>
+    <div>
+      <h2>Payroll Management</h2>
+      <AddPayroll token={token} />
+      <ListPayrolls token={token} />
+    </div>
   );
 };
 
-export default AddPayroll;
+export default PayrollManagement;
 ```
 
-##### `GenerateTax.js`
-
-This component will handle the generation of tax records:
+#### TaxManagement Page
 
 ```javascript
-// src/components/GenerateTax.js
+// src/pages/TaxManagement.js
 
-import React, { useState } from 'react';
-import { generateTax } from '../services/api';
+import React from 'react';
+import GenerateTax from '../components/GenerateTax';
+import ListTaxes from '../components/ListTaxes';
 
-const GenerateTax = () => {
-  const [employeeId, setEmployeeId] = useState('');
-  const [taxYear, setTaxYear] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const taxRecord = await generateTax(employeeId
-
-, taxYear);
-    console.log('Generated Tax Record:', taxRecord);
-  };
-
+const TaxManagement = ({ token }) => {
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Generate Tax</h2>
-      <input
-        type="number"
-        value={employeeId}
-        onChange={(e) => setEmployeeId(e.target.value)}
-        placeholder="Employee ID"
-        required
-      />
-      <input
-        type="number"
-        value={taxYear}
-        onChange={(e) => setTaxYear(e.target.value)}
-        placeholder="Tax Year"
-        required
-      />
-      <button type="submit">Generate</button>
-    </form>
+    <div>
+      <h2>Tax Management</h2>
+      <GenerateTax token={token} />
+      <ListTaxes token={token} />
+    </div>
   );
 };
 
-export default GenerateTax;
+export default TaxManagement;
 ```
 
-##### `CreateFinancialRecord.js`
-
-This component will handle the creation of financial records:
+#### FinancialRecordManagement Page
 
 ```javascript
-// src/components/CreateFinancialRecord.js
+// src/pages/FinancialRecordManagement.js
 
-import React, { useState } from 'react';
-import { createFinancialRecord } from '../services/api';
+import React from 'react';
+import CreateFinancialRecord from '../components/CreateFinancialRecord';
+import ListFinancialRecords from '../components/ListFinancialRecords';
 
-const CreateFinancialRecord = () => {
-  const [record, setRecord] = useState({
-    employee_id: '',
-    description: '',
-    amount: '',
-    record_type: '',
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setRecord({ ...record, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await createFinancialRecord(record);
-    setRecord({
-      employee_id: '',
-      description: '',
-      amount: '',
-      record_type: '',
-    });
-  };
-
+const FinancialRecordManagement = ({ token }) => {
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Create Financial Record</h2>
-      <input
-        type="number"
-        name="employee_id"
-        value={record.employee_id}
-        onChange={handleChange}
-        placeholder="Employee ID"
-        required
-      />
-      <input
-        type="text"
-        name="description"
-        value={record.description}
-        onChange={handleChange}
-        placeholder="Description"
-        required
-      />
-      <input
-        type="number"
-        name="amount"
-        value={record.amount}
-        onChange={handleChange}
-        placeholder="Amount"
-        required
-      />
-      <input
-        type="text"
-        name="record_type"
-        value={record.record_type}
-        onChange={handleChange}
-        placeholder="Record Type"
-        required
-      />
-      <button type="submit">Create Record</button>
-    </form>
+    <div>
+      <h2>Financial Record Management</h2>
+      <CreateFinancialRecord token={token} />
+      <ListFinancialRecords token={token} />
+    </div>
   );
 };
 
-export default CreateFinancialRecord;
+export default FinancialRecordManagement;
 ```
 
-#### 5. Main App Component
+### Main App Component
 
-Create the main `App.js` component to include the above components:
+Configure the routes and integrate everything into the `App.js`:
 
 ```javascript
 // src/App.js
 
-import React from 'react';
-import EmployeeList from './components/EmployeeList';
-import AddEmployee from './components/AddEmployee';
-import AddPayroll from './components/AddPayroll';
-import GenerateTax from './components/GenerateTax';
-import CreateFinancialRecord from './components/CreateFinancialRecord';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Redirect, Link } from 'react-router-dom';
+import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
+import EmployeeManagement
+
+ from './pages/EmployeeManagement';
+import PayrollManagement from './pages/PayrollManagement';
+import TaxManagement from './pages/TaxManagement';
+import FinancialRecordManagement from './pages/FinancialRecordManagement';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import Navbar from './components/Navbar';
 import './App.css';
 
 function App() {
+  const [token, setToken] = useState('');
+  const [user, setUser] = useState(null);
+
+  const handleLogout = () => {
+    setToken('');
+    setUser(null);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Employee Management System</h1>
-      </header>
-      <AddEmployee />
-      <EmployeeList />
-      <AddPayroll />
-      <GenerateTax />
-      <CreateFinancialRecord />
-    </div>
+    <Router>
+      <div className="App">
+        <Navbar user={user} onLogout={handleLogout} />
+        <Route path="/" exact component={Home} />
+        <Route path="/login">
+          {!token ? <Login setToken={setToken} setUser={setUser} /> : <Redirect to="/dashboard" />}
+        </Route>
+        <Route path="/signup">
+          {!token ? <Signup /> : <Redirect to="/dashboard" />}
+        </Route>
+        <Route path="/dashboard">
+          {token ? <Dashboard /> : <Redirect to="/login" />}
+        </Route>
+        <Route path="/employees">
+          {user?.role === 'admin' ? <EmployeeManagement token={token} /> : <Redirect to="/dashboard" />}
+        </Route>
+        <Route path="/payrolls">
+          {user?.role === 'admin' ? <PayrollManagement token={token} /> : <Redirect to="/dashboard" />}
+        </Route>
+        <Route path="/taxes">
+          {user?.role === 'admin' ? <TaxManagement token={token} /> : <Redirect to="/dashboard" />}
+        </Route>
+        <Route path="/financial-records">
+          {user?.role === 'admin' ? <FinancialRecordManagement token={token} /> : <Redirect to="/dashboard" />}
+        </Route>
+      </div>
+    </Router>
   );
 }
 
 export default App;
 ```
 
-#### 6. Index File
+### CSS Styling
 
-Ensure your `index.js` is set up to render the `App` component:
-
-```javascript
-// src/index.js
-
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
-```
-
-#### 7. Styles (Optional)
-
-You can add basic styles in `App.css`:
+You can add basic CSS styles in `App.css` to make the app look better:
 
 ```css
 /* src/App.css */
@@ -566,14 +426,36 @@ You can add basic styles in `App.css`:
   color: white;
 }
 
+nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+nav ul li {
+  display: inline;
+  margin-right: 20px;
+}
+
+nav ul li a, nav ul li button {
+  color: #61dafb;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
+}
+
 form {
   margin: 20px;
   padding: 10px;
   border: 1px solid #ccc;
+  display: inline-block;
+  text-align: left;
 }
 
-input {
-  margin: 5px;
+input, select {
+  display: block;
+  margin: 5px 0;
   padding: 8px;
   font-size: 1em;
 }
@@ -593,6 +475,311 @@ Make sure your FastAPI server is running. Then, start your React app with:
 npm start
 ```
 
-Open your browser and navigate to `http://localhost:3000` to see the React app in action.
+Open your browser and navigate to `http://localhost:3000` to see the React app in action. You now have a role-based authentication system with a functional payroll management system and a beautiful UI.
 
-This setup provides a basic React frontend for managing employees, creating payroll records, generating tax records, and creating financial records using your FastAPI backend. You can extend this by adding more features, handling edge cases, and improving the UI/UX as per your requirements.
+Sure, here is the complete `api.js` file with all the necessary API endpoints for user authentication, employee management, payroll management, tax management, and financial record management:
+
+### `api.js`
+
+```javascript
+import axios from 'axios';
+
+const API_URL = 'http://localhost:8000';
+
+export const login = async (data) => {
+  const response = await axios.post(`${API_URL}/auth/login`, data);
+  return response.data;
+};
+
+export const signup = async (data) => {
+  const response = await axios.post(`${API_URL}/auth/signup`, data);
+  return response.data;
+};
+
+export const getUserDetails = async (token) => {
+  const response = await axios.get(`${API_URL}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const getEmployees = async (token) => {
+  const response = await axios.get(`${API_URL}/employees`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const createEmployee = async (employee, token) => {
+  const response = await axios.post(`${API_URL}/employees`, employee, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const getEmployeeById = async (employeeId, token) => {
+  const response = await axios.get(`${API_URL}/employees/${employeeId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const updateEmployee = async (employeeId, employee, token) => {
+  const response = await axios.put(`${API_URL}/employees/${employeeId}`, employee, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const deleteEmployee = async (employeeId, token) => {
+  const response = await axios.delete(`${API_URL}/employees/${employeeId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const getPayrolls = async (token) => {
+  const response = await axios.get(`${API_URL}/payrolls`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const createPayroll = async (payroll, token) => {
+  const response = await axios.post(`${API_URL}/payrolls`, payroll, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const getFinancialRecords = async (token) => {
+  const response = await axios.get(`${API_URL}/financial_records`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const createFinancialRecord = async (record, token) => {
+  const response = await axios.post(`${API_URL}/financial_records`, record, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const generateTax = async (employeeId, taxYear, token) => {
+  const response = await axios.post(`${API_URL}/taxes/generate`, {
+    employee_id: employeeId,
+    tax_year: taxYear,
+  }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const getTaxes = async (token) => {
+  const response = await axios.get(`${API_URL}/taxes`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+```
+
+### Explanation:
+
+1. **User Authentication**:
+    - `login`: Sends a POST request to the `/auth/login` endpoint to authenticate the user.
+    - `signup`: Sends a POST request to the `/auth/signup` endpoint to register a new user.
+    - `getUserDetails`: Sends a GET request to the `/auth/me` endpoint to fetch details of the currently authenticated user.
+
+2. **Employee Management**:
+    - `getEmployees`: Sends a GET request to the `/employees` endpoint to fetch all employees.
+    - `createEmployee`: Sends a POST request to the `/employees` endpoint to create a new employee.
+    - `getEmployeeById`: Sends a GET request to the `/employees/{employeeId}` endpoint to fetch a specific employee by ID.
+    - `updateEmployee`: Sends a PUT request to the `/employees/{employeeId}` endpoint to update an employee's details.
+    - `deleteEmployee`: Sends a DELETE request to the `/employees/{employeeId}` endpoint to delete an employee.
+
+3. **Payroll Management**:
+    - `getPayrolls`: Sends a GET request to the
+
+
+
+
+Certainly! Let's continue with the components and provide a brief overview of what each might contain based on their names:
+
+### 10. ListFinancialRecords.js
+```jsx
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const ListFinancialRecords = () => {
+  const [financialRecords, setFinancialRecords] = useState([]);
+
+  useEffect(() => {
+    // Fetch financial records from API or mock data
+    const fetchFinancialRecords = async () => {
+      try {
+        const response = await axios.get('/api/financial-records');
+        setFinancialRecords(response.data);
+      } catch (error) {
+        console.error('Error fetching financial records:', error);
+      }
+    };
+
+    fetchFinancialRecords();
+  }, []);
+
+  return (
+    <div>
+      <h2>Financial Records List</h2>
+      <ul>
+        {financialRecords.map(record => (
+          <li key={record.id}>
+            Type: {record.type} - Amount: {record.amount}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default ListFinancialRecords;
+```
+
+### 11. GenerateTax.js
+```jsx
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const GenerateTax = () => {
+  const [year, setYear] = useState('');
+  const [amount, setAmount] = useState('');
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/api/taxes/generate', {
+        year,
+        amount
+      });
+      console.log('Tax generated successfully:', response.data);
+      // Optionally, reset form fields or show success message
+    } catch (error) {
+      console.error('Error generating tax:', error);
+      // Handle error, show error message, etc.
+    }
+  };
+
+  return (
+    <div>
+      <h2>Generate Tax</h2>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Year:
+          <input type="text" value={year} onChange={e => setYear(e.target.value)} />
+        </label>
+        <label>
+          Amount:
+          <input type="text" value={amount} onChange={e => setAmount(e.target.value)} />
+        </label>
+        <button type="submit">Generate Tax</button>
+      </form>
+    </div>
+  );
+};
+
+export default GenerateTax;
+```
+
+### 12. ListTaxes.js
+```jsx
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const ListTaxes = () => {
+  const [taxes, setTaxes] = useState([]);
+
+  useEffect(() => {
+    // Fetch taxes from API or mock data
+    const fetchTaxes = async () => {
+      try {
+        const response = await axios.get('/api/taxes');
+        setTaxes(response.data);
+      } catch (error) {
+        console.error('Error fetching taxes:', error);
+      }
+    };
+
+    fetchTaxes();
+  }, []);
+
+  return (
+    <div>
+      <h2>Tax List</h2>
+      <ul>
+        {taxes.map(tax => (
+          <li key={tax.id}>
+            Year: {tax.year} - Amount: {tax.amount}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default ListTaxes;
+```
+
+### 13. CreateFinancialRecord.js
+```jsx
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const CreateFinancialRecord = () => {
+  const [type, setType] = useState('');
+  const [amount, setAmount] = useState('');
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/api/financial-records', {
+        type,
+        amount
+      });
+      console.log('Financial record created successfully:', response.data);
+      // Optionally, reset form fields or show success message
+    } catch (error) {
+      console.error('Error creating financial record:', error);
+      // Handle error, show error message, etc.
+    }
+  };
+
+  return (
+    <div>
+      <h2>Create Financial Record</h2>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Type:
+          <input type="text" value={type} onChange={e => setType(e.target.value)} />
+        </label>
+        <label>
+          Amount:
+          <input type="text" value={amount} onChange={e => setAmount(e.target.value)} />
+        </label>
+        <button type="submit">Create Financial Record</button>
+      </form>
+    </div>
+  );
+};
+
+export default CreateFinancialRecord;
+```
+
+### Summary:
+These components cover various functionalities related to managing employees, payrolls, taxes, and financial records within a React application. Each component handles specific tasks such as listing, adding, updating, and deleting entities like employees, payrolls, taxes, and financial records. They utilize React hooks (`useState`, `useEffect`) for managing state and axios for making HTTP requests to interact with a mock API or real backend services.
+
+- **EmployeeList.js**, **AddEmployee.js**, **UpdateEmployee.js**, **DeleteEmployee.js**: Handle CRUD operations for managing employees.
+- **AddPayroll.js**, **ListPayrolls.js**: Manage payroll data including adding new payrolls and listing existing ones.
+- **GenerateTax.js**, **ListTaxes.js**: Provide functionality to generate taxes for a specific year and list existing tax records.
+- **CreateFinancialRecord.js**, **ListFinancialRecords.js**: Manage financial records such as creating new records and listing existing ones.
+
+These components can be further integrated with routing, authentication, and additional UI/UX improvements as per the requirements of the application.
