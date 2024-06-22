@@ -1,785 +1,242 @@
-Certainly! I'll create a well-organized React application with proper routing, role-based authentication, and a functional payroll management system. Here's how we'll approach it:
+Sure, let's focus on setting up the authentication system using FastAPI with JWT for authentication and role-based access control.
 
-1. **Setup React Router**: Use React Router to manage routes.
-2. **Authentication**: Implement role-based authentication and protect routes.
-3. **Components**: Create and organize components for various functionalities.
-4. **Styling**: Use basic CSS for styling.
-
-### Step 1: Setup React Router
-
-First, install React Router:
-
+### Step 1: Install Required Packages
+Install the necessary packages:
 ```bash
-npm install react-router-dom
+pip install fastapi uvicorn sqlalchemy bcrypt python-jose
 ```
 
-### Directory Structure
+### Step 2: Directory Structure
 
 ```
-my-react-app/
+project/
 │
-├── public/
-│   ├── index.html
-├── src/
-│   ├── components/
-│   │   ├── EmployeeList.js
-│   │   ├── AddEmployee.js
-│   │   ├── UpdateEmployee.js
-│   │   ├── DeleteEmployee.js
-│   │   ├── AddPayroll.js
-│   │   ├── ListPayrolls.js
-│   │   ├── GenerateTax.js
-│   │   ├── ListTaxes.js
-│   │   ├── CreateFinancialRecord.js
-│   │   ├── ListFinancialRecords.js
-│   │   ├── Login.js
-│   │   ├── Signup.js
-│   │   ├── Navbar.js
-│   ├── services/
-│   │   ├── api.js
-│   ├── pages/
-│   │   ├── Home.js
-│   │   ├── Dashboard.js
-│   │   ├── EmployeeManagement.js
-│   │   ├── PayrollManagement.js
-│   │   ├── TaxManagement.js
-│   │   ├── FinancialRecordManagement.js
-│   ├── App.js
-│   ├── index.js
-│   ├── App.css
-├── package.json
-└── .gitignore
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── models.py
+│   ├── schemas.py
+│   ├── crud.py
+│   ├── database.py
+│   ├── auth.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── endpoints/
+│   │   │   ├── __init__.py
+│   │   │   ├── auth.py
 ```
 
-### Step 2: Create Components
+### Step 3: Define the Code
 
-#### Navbar Component
+#### `app/auth.py` (JWT Utilities)
+```python
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 
-```javascript
-// src/components/Navbar.js
+SECRET_KEY = "your_secret_key"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-const Navbar = ({ user, onLogout }) => {
-  return (
-    <nav>
-      <ul>
-        <li><Link to="/">Home</Link></li>
-        {user && user.role === 'admin' && (
-          <>
-            <li><Link to="/employees">Employees</Link></li>
-            <li><Link to="/payrolls">Payrolls</Link></li>
-            <li><Link to="/taxes">Taxes</Link></li>
-            <li><Link to="/financial-records">Financial Records</Link></li>
-          </>
-        )}
-        {user && (
-          <>
-            <li><Link to="/dashboard">Dashboard</Link></li>
-            <li><button onClick={onLogout}>Logout</button></li>
-          </>
-        )}
-        {!user && (
-          <>
-            <li><Link to="/login">Login</Link></li>
-            <li><Link to="/signup">Signup</Link></li>
-          </>
-        )}
-      </ul>
-    </nav>
-  );
-};
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
 
-export default Navbar;
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def decode_access_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        return None
 ```
 
-#### Login Component
+#### `app/models.py`
+```python
+from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy.orm import relationship
+from .database import Base
+import enum
 
-```javascript
-// src/components/Login.js
+class Role(str, enum.Enum):
+    admin = "admin"
+    employee = "employee"
 
-import React, { useState } from 'react';
-import { login, getUserDetails } from '../services/api';
-import { useHistory } from 'react-router-dom';
-
-const Login = ({ setToken, setUser }) => {
-  const [form, setForm] = useState({ username: '', password: '' });
-  const history = useHistory();
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const token = await login(form);
-    setToken(token.access_token);
-    const user = await getUserDetails(token.access_token);
-    setUser(user);
-    history.push('/dashboard');
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <h2>Login</h2>
-      <input
-        type="text"
-        name="username"
-        value={form.username}
-        onChange={handleChange}
-        placeholder="Username"
-        required
-      />
-      <input
-        type="password"
-        name="password"
-        value={form.password}
-        onChange={handleChange}
-        placeholder="Password"
-        required
-      />
-      <button type="submit">Login</button>
-    </form>
-  );
-};
-
-export default Login;
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    role = Column(Enum(Role), default=Role.employee)
 ```
 
-#### Signup Component
+#### `app/schemas.py`
+```python
+from pydantic import BaseModel, EmailStr
+from enum import Enum
 
-```javascript
-// src/components/Signup.js
+class Role(str, Enum):
+    admin = "admin"
+    employee = "employee"
 
-import React, { useState } from 'react';
-import { signup } from '../services/api';
-import { useHistory } from 'react-router-dom';
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
 
-const Signup = () => {
-  const [form, setForm] = useState({ username: '', password: '', role: 'employee' });
-  const history = useHistory();
+class UserCreate(UserBase):
+    password: str
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
+class User(UserBase):
+    id: int
+    role: Role
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await signup(form);
-    history.push('/login');
-  };
+    class Config:
+        orm_mode = True
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <h2>Signup</h2>
-      <input
-        type="text"
-        name="username"
-        value={form.username}
-        onChange={handleChange}
-        placeholder="Username"
-        required
-      />
-      <input
-        type="password"
-        name="password"
-        value={form.password}
-        onChange={handleChange}
-        placeholder="Password"
-        required
-      />
-      <select name="role" value={form.role} onChange={handleChange}>
-        <option value="employee">Employee</option>
-        <option value="admin">Admin</option>
-      </select>
-      <button type="submit">Signup</button>
-    </form>
-  );
-};
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
-export default Signup;
+class TokenData(BaseModel):
+    username: str = None
+    role: str = None
+
+class Login(BaseModel):
+    username: str
+    password: str
 ```
 
-#### Other Components
+#### `app/crud.py`
+```python
+from sqlalchemy.orm import Session
+from . import models, schemas
+from .auth import get_password_hash
 
-I'll provide a few more components for managing employees, payrolls, taxes, and financial records. You can create similar ones for the other entities.
+def get_user_by_username(db: Session, username: str):
+    return db.query(models.User).filter(models.User.username == username).first()
 
-### Pages
-
-#### Home Page
-
-```javascript
-// src/pages/Home.js
-
-import React from 'react';
-
-const Home = () => {
-  return (
-    <div>
-      <h2>Welcome to the Employee Management System</h2>
-    </div>
-  );
-};
-
-export default Home;
+def create_user(db: Session, user: schemas.UserCreate):
+    db_user = models.User(
+        username=user.username,
+        email=user.email,
+        hashed_password=get_password_hash(user.password),
+        role=user.role
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 ```
 
-#### Dashboard Page
+#### `app/database.py`
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-```javascript
-// src/pages/Dashboard.js
+DATABASE_URL = "sqlite:///./test.db"
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
 
-const Dashboard = () => {
-  return (
-    <div>
-      <h2>Dashboard</h2>
-      <ul>
-        <li><Link to="/employees">Manage Employees</Link></li>
-        <li><Link to="/payrolls">Manage Payrolls</Link></li>
-        <li><Link to="/taxes">Manage Taxes</Link></li>
-        <li><Link to="/financial-records">Manage Financial Records</Link></li>
-      </ul>
-    </div>
-  );
-};
-
-export default Dashboard;
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 ```
 
-#### EmployeeManagement Page
+#### `app/api/endpoints/auth.py`
+```python
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
+from datetime import timedelta
+from jose import JWTError, jwt
 
-```javascript
-// src/pages/EmployeeManagement.js
+from ... import schemas, crud, models, database
+from ...auth import create_access_token, verify_password
 
-import React from 'react';
-import AddEmployee from '../components/AddEmployee';
-import UpdateEmployee from '../components/UpdateEmployee';
-import DeleteEmployee from '../components/DeleteEmployee';
-import EmployeeList from '../components/EmployeeList';
+router = APIRouter()
 
-const EmployeeManagement = ({ token }) => {
-  return (
-    <div>
-      <h2>Employee Management</h2>
-      <AddEmployee token={token} />
-      <UpdateEmployee token={token} />
-      <DeleteEmployee token={token} />
-      <EmployeeList token={token} />
-    </div>
-  );
-};
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
-export default EmployeeManagement;
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = schemas.TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = crud.get_user_by_username(db, username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+def get_current_active_user(current_user: schemas.User = Depends(get_current_user)):
+    if current_user.role != "admin" and current_user.role != "employee":
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+def get_current_active_admin(current_user: schemas.User = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=400, detail="Admin privileges required")
+    return current_user
+
+@router.post("/signup", response_model=schemas.User)
+def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    db_user = crud.get_user_by_username(db, username=user.username)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    return crud.create_user(db=db, user=user)
+
+@router.post("/token", response_model=schemas.Token)
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
+    user = crud.get_user_by_username(db, username=form_data.username)
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username, "role": user.role}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
 ```
 
-#### PayrollManagement Page
-
-```javascript
-// src/pages/PayrollManagement.js
-
-import React from 'react';
-import AddPayroll from '../components/AddPayroll';
-import ListPayrolls from '../components/ListPayrolls';
-
-const PayrollManagement = ({ token }) => {
-  return (
-    <div>
-      <h2>Payroll Management</h2>
-      <AddPayroll token={token} />
-      <ListPayrolls token={token} />
-    </div>
-  );
-};
-
-export default PayrollManagement;
-```
-
-#### TaxManagement Page
-
-```javascript
-// src/pages/TaxManagement.js
-
-import React from 'react';
-import GenerateTax from '../components/GenerateTax';
-import ListTaxes from '../components/ListTaxes';
-
-const TaxManagement = ({ token }) => {
-  return (
-    <div>
-      <h2>Tax Management</h2>
-      <GenerateTax token={token} />
-      <ListTaxes token={token} />
-    </div>
-  );
-};
-
-export default TaxManagement;
-```
-
-#### FinancialRecordManagement Page
-
-```javascript
-// src/pages/FinancialRecordManagement.js
-
-import React from 'react';
-import CreateFinancialRecord from '../components/CreateFinancialRecord';
-import ListFinancialRecords from '../components/ListFinancialRecords';
-
-const FinancialRecordManagement = ({ token }) => {
-  return (
-    <div>
-      <h2>Financial Record Management</h2>
-      <CreateFinancialRecord token={token} />
-      <ListFinancialRecords token={token} />
-    </div>
-  );
-};
-
-export default FinancialRecordManagement;
-```
-
-### Main App Component
-
-Configure the routes and integrate everything into the `App.js`:
-
-```javascript
-// src/App.js
-
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Redirect, Link } from 'react-router-dom';
-import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
-import EmployeeManagement
-
- from './pages/EmployeeManagement';
-import PayrollManagement from './pages/PayrollManagement';
-import TaxManagement from './pages/TaxManagement';
-import FinancialRecordManagement from './pages/FinancialRecordManagement';
-import Login from './components/Login';
-import Signup from './components/Signup';
-import Navbar from './components/Navbar';
-import './App.css';
-
-function App() {
-  const [token, setToken] = useState('');
-  const [user, setUser] = useState(null);
-
-  const handleLogout = () => {
-    setToken('');
-    setUser(null);
-  };
-
-  return (
-    <Router>
-      <div className="App">
-        <Navbar user={user} onLogout={handleLogout} />
-        <Route path="/" exact component={Home} />
-        <Route path="/login">
-          {!token ? <Login setToken={setToken} setUser={setUser} /> : <Redirect to="/dashboard" />}
-        </Route>
-        <Route path="/signup">
-          {!token ? <Signup /> : <Redirect to="/dashboard" />}
-        </Route>
-        <Route path="/dashboard">
-          {token ? <Dashboard /> : <Redirect to="/login" />}
-        </Route>
-        <Route path="/employees">
-          {user?.role === 'admin' ? <EmployeeManagement token={token} /> : <Redirect to="/dashboard" />}
-        </Route>
-        <Route path="/payrolls">
-          {user?.role === 'admin' ? <PayrollManagement token={token} /> : <Redirect to="/dashboard" />}
-        </Route>
-        <Route path="/taxes">
-          {user?.role === 'admin' ? <TaxManagement token={token} /> : <Redirect to="/dashboard" />}
-        </Route>
-        <Route path="/financial-records">
-          {user?.role === 'admin' ? <FinancialRecordManagement token={token} /> : <Redirect to="/dashboard" />}
-        </Route>
-      </div>
-    </Router>
-  );
-}
-
-export default App;
-```
-
-### CSS Styling
-
-You can add basic CSS styles in `App.css` to make the app look better:
-
-```css
-/* src/App.css */
-
-.App {
-  text-align: center;
-}
-
-.App-header {
-  background-color: #282c34;
-  padding: 20px;
-  color: white;
-}
-
-nav ul {
-  list-style: none;
-  padding: 0;
-}
-
-nav ul li {
-  display: inline;
-  margin-right: 20px;
-}
-
-nav ul li a, nav ul li button {
-  color: #61dafb;
-  text-decoration: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1em;
-}
-
-form {
-  margin: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  display: inline-block;
-  text-align: left;
-}
-
-input, select {
-  display: block;
-  margin: 5px 0;
-  padding: 8px;
-  font-size: 1em;
-}
-
-button {
-  padding: 8px 16px;
-  font-size: 1em;
-  cursor: pointer;
-}
-```
-
-### Running the React App
-
-Make sure your FastAPI server is running. Then, start your React app with:
-
-```bash
-npm start
-```
-
-Open your browser and navigate to `http://localhost:3000` to see the React app in action. You now have a role-based authentication system with a functional payroll management system and a beautiful UI.
-
-Sure, here is the complete `api.js` file with all the necessary API endpoints for user authentication, employee management, payroll management, tax management, and financial record management:
-
-### `api.js`
-
-```javascript
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8000';
-
-export const login = async (data) => {
-  const response = await axios.post(`${API_URL}/auth/login`, data);
-  return response.data;
-};
-
-export const signup = async (data) => {
-  const response = await axios.post(`${API_URL}/auth/signup`, data);
-  return response.data;
-};
-
-export const getUserDetails = async (token) => {
-  const response = await axios.get(`${API_URL}/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const getEmployees = async (token) => {
-  const response = await axios.get(`${API_URL}/employees`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const createEmployee = async (employee, token) => {
-  const response = await axios.post(`${API_URL}/employees`, employee, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const getEmployeeById = async (employeeId, token) => {
-  const response = await axios.get(`${API_URL}/employees/${employeeId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const updateEmployee = async (employeeId, employee, token) => {
-  const response = await axios.put(`${API_URL}/employees/${employeeId}`, employee, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const deleteEmployee = async (employeeId, token) => {
-  const response = await axios.delete(`${API_URL}/employees/${employeeId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const getPayrolls = async (token) => {
-  const response = await axios.get(`${API_URL}/payrolls`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const createPayroll = async (payroll, token) => {
-  const response = await axios.post(`${API_URL}/payrolls`, payroll, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const getFinancialRecords = async (token) => {
-  const response = await axios.get(`${API_URL}/financial_records`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const createFinancialRecord = async (record, token) => {
-  const response = await axios.post(`${API_URL}/financial_records`, record, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const generateTax = async (employeeId, taxYear, token) => {
-  const response = await axios.post(`${API_URL}/taxes/generate`, {
-    employee_id: employeeId,
-    tax_year: taxYear,
-  }, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const getTaxes = async (token) => {
-  const response = await axios.get(`${API_URL}/taxes`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-```
-
-### Explanation:
-
-1. **User Authentication**:
-    - `login`: Sends a POST request to the `/auth/login` endpoint to authenticate the user.
-    - `signup`: Sends a POST request to the `/auth/signup` endpoint to register a new user.
-    - `getUserDetails`: Sends a GET request to the `/auth/me` endpoint to fetch details of the currently authenticated user.
-
-2. **Employee Management**:
-    - `getEmployees`: Sends a GET request to the `/employees` endpoint to fetch all employees.
-    - `createEmployee`: Sends a POST request to the `/employees` endpoint to create a new employee.
-    - `getEmployeeById`: Sends a GET request to the `/employees/{employeeId}` endpoint to fetch a specific employee by ID.
-    - `updateEmployee`: Sends a PUT request to the `/employees/{employeeId}` endpoint to update an employee's details.
-    - `deleteEmployee`: Sends a DELETE request to the `/employees/{employeeId}` endpoint to delete an employee.
-
-3. **Payroll Management**:
-    - `getPayrolls`: Sends a GET request to the
-
-
-
-
-Certainly! Let's continue with the components and provide a brief overview of what each might contain based on their names:
-
-### 10. ListFinancialRecords.js
-```jsx
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const ListFinancialRecords = () => {
-  const [financialRecords, setFinancialRecords] = useState([]);
-
-  useEffect(() => {
-    // Fetch financial records from API or mock data
-    const fetchFinancialRecords = async () => {
-      try {
-        const response = await axios.get('/api/financial-records');
-        setFinancialRecords(response.data);
-      } catch (error) {
-        console.error('Error fetching financial records:', error);
-      }
-    };
-
-    fetchFinancialRecords();
-  }, []);
-
-  return (
-    <div>
-      <h2>Financial Records List</h2>
-      <ul>
-        {financialRecords.map(record => (
-          <li key={record.id}>
-            Type: {record.type} - Amount: {record.amount}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default ListFinancialRecords;
-```
-
-### 11. GenerateTax.js
-```jsx
-import React, { useState } from 'react';
-import axios from 'axios';
-
-const GenerateTax = () => {
-  const [year, setYear] = useState('');
-  const [amount, setAmount] = useState('');
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('/api/taxes/generate', {
-        year,
-        amount
-      });
-      console.log('Tax generated successfully:', response.data);
-      // Optionally, reset form fields or show success message
-    } catch (error) {
-      console.error('Error generating tax:', error);
-      // Handle error, show error message, etc.
-    }
-  };
-
-  return (
-    <div>
-      <h2>Generate Tax</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Year:
-          <input type="text" value={year} onChange={e => setYear(e.target.value)} />
-        </label>
-        <label>
-          Amount:
-          <input type="text" value={amount} onChange={e => setAmount(e.target.value)} />
-        </label>
-        <button type="submit">Generate Tax</button>
-      </form>
-    </div>
-  );
-};
-
-export default GenerateTax;
-```
-
-### 12. ListTaxes.js
-```jsx
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const ListTaxes = () => {
-  const [taxes, setTaxes] = useState([]);
-
-  useEffect(() => {
-    // Fetch taxes from API or mock data
-    const fetchTaxes = async () => {
-      try {
-        const response = await axios.get('/api/taxes');
-        setTaxes(response.data);
-      } catch (error) {
-        console.error('Error fetching taxes:', error);
-      }
-    };
-
-    fetchTaxes();
-  }, []);
-
-  return (
-    <div>
-      <h2>Tax List</h2>
-      <ul>
-        {taxes.map(tax => (
-          <li key={tax.id}>
-            Year: {tax.year} - Amount: {tax.amount}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default ListTaxes;
-```
-
-### 13. CreateFinancialRecord.js
-```jsx
-import React, { useState } from 'react';
-import axios from 'axios';
-
-const CreateFinancialRecord = () => {
-  const [type, setType] = useState('');
-  const [amount, setAmount] = useState('');
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('/api/financial-records', {
-        type,
-        amount
-      });
-      console.log('Financial record created successfully:', response.data);
-      // Optionally, reset form fields or show success message
-    } catch (error) {
-      console.error('Error creating financial record:', error);
-      // Handle error, show error message, etc.
-    }
-  };
-
-  return (
-    <div>
-      <h2>Create Financial Record</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Type:
-          <input type="text" value={type} onChange={e => setType(e.target.value)} />
-        </label>
-        <label>
-          Amount:
-          <input type="text" value={amount} onChange={e => setAmount(e.target.value)} />
-        </label>
-        <button type="submit">Create Financial Record</button>
-      </form>
-    </div>
-  );
-};
-
-export default CreateFinancialRecord;
-```
-
-### Summary:
-These components cover various functionalities related to managing employees, payrolls, taxes, and financial records within a React application. Each component handles specific tasks such as listing, adding, updating, and deleting entities like employees, payrolls, taxes, and financial records. They utilize React hooks (`useState`, `useEffect`) for managing state and axios for making HTTP requests to interact with a mock API or real backend services.
-
-- **EmployeeList.js**, **AddEmployee.js**, **UpdateEmployee.js**, **DeleteEmployee.js**: Handle CRUD operations for managing employees.
-- **AddPayroll.js**, **ListPayrolls.js**: Manage payroll data including adding new payrolls and listing existing ones.
-- **GenerateTax.js**, **ListTaxes.js**: Provide functionality to generate taxes for a specific year and list existing tax records.
-- **CreateFinancialRecord.js**, **ListFinancialRecords.js**: Manage financial records such as creating new records and listing existing ones.
-
-These components can be further integrated with routing, authentication, and additional UI/UX improvements as per the requirements of the application.
+### Summary
+
+- **`auth.py`**: Utility functions for password hashing, JWT token creation, and validation.
+- **`models.py`**: Defines the `User` model and `Role` enum.
+- **`schemas.py`**: Pydantic models for user, token, and role schemas.
+- **`crud.py`**: Functions for creating and fetching users from the database.
+- **`database.py`**: Database setup with SQLAlchemy.
+- **`api/endpoints/auth.py`**: API routes for user signup, login, and retrieving the current user.
+
+This setup includes user registration, login, JWT token handling, and role-based access control for "admin" and "employee" roles. You can extend this to add more functionalities and integrate it with your existing endpoints.
